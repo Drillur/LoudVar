@@ -14,6 +14,8 @@ signal emptied
 var current: LoudFloat
 var total: LoudFloat
 
+var text: String
+var text_requires_update := true
 var limit_to_zero := true
 var limit_to_total := true
 
@@ -22,6 +24,8 @@ var limit_to_total := true
 func _init(base_value: float, base_total: float):
 	current = LoudFloat.new(base_value)
 	total = LoudFloat.new(base_total)
+	current.text_changed.connect(text_changed)
+	total.text_changed.connect(text_changed)
 	current.changed.connect(emit_changed)
 	total.changed.connect(emit_changed)
 
@@ -32,6 +36,10 @@ func do_not_limit_to_total() -> void:
 
 func do_not_limit_to_zero() -> void:
 	limit_to_zero = false
+
+
+func text_changed() -> void:
+	text_requires_update = true
 
 
 
@@ -93,16 +101,15 @@ func get_surplus(amount: float) -> float:
 	return 0.0
 
 
-func get_current_and_total_text() -> String:
-	return current.get_text() + "/" + total.get_text()
-
-
-func get_text_with_hyphon() -> String:
-	return current.get_text() + "-" + total.get_text()
+func get_text() -> String:
+	if text_requires_update:
+		text_requires_update = false
+		text = current.get_text() + "/" + total.get_text()
+	return text
 
 
 func is_full() -> bool:
-	return is_equal_approx(current.get_value(), total.get_value())
+	return is_equal_approx(get_current(), get_total())
 
 
 func is_not_full() -> bool:

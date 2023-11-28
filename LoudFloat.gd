@@ -9,6 +9,7 @@ const saved_vars := [
 
 signal increased
 signal decreased
+signal text_changed
 
 var base: float
 var current: float:
@@ -29,6 +30,7 @@ var text: String:
 		if text_requires_update:
 			text_requires_update = false
 			text = Big.get_float_text(current)
+			text_changed.emit()
 		return text
 
 
