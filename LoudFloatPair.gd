@@ -30,12 +30,14 @@ func _init(base_value: float, base_total: float):
 	total.changed.connect(emit_changed)
 
 
-func do_not_limit_to_total() -> void:
+func do_not_limit_to_total() -> FloatPair:
 	limit_to_total = false
+	return self
 
 
-func do_not_limit_to_zero() -> void:
+func do_not_limit_to_zero() -> FloatPair:
 	limit_to_zero = false
+	return self
 
 
 func text_changed() -> void:
@@ -44,13 +46,18 @@ func text_changed() -> void:
 
 
 func add(amount: float) -> void:
+	if limit_to_total and is_full():
+		return
 	current.add(amount)
 	clamp_current()
 	if current.equal(total.get_value()):
+		print("FILLED - ", get_text())
 		filled.emit()
 
 
 func subtract(amount: float) -> void:
+	if limit_to_zero and is_empty():
+		return
 	current.subtract(amount)
 	clamp_current()
 	if current.equal(0):
@@ -114,3 +121,7 @@ func is_full() -> bool:
 
 func is_not_full() -> bool:
 	return not is_full()
+
+
+func is_empty() -> bool:
+	return current.equal(0.0)
