@@ -50,8 +50,7 @@ func add(amount: float) -> void:
 		return
 	current.add(amount)
 	clamp_current()
-	if current.equal(total.get_value()):
-		print("FILLED - ", get_text())
+	if current.greater_equal(total.get_value()):
 		filled.emit()
 
 

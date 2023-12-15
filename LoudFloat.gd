@@ -7,6 +7,7 @@ const saved_vars := [
 	"current",
 ]
 
+signal changed_with_previous_value(previous_value)
 signal increased
 signal decreased
 signal text_changed
@@ -23,6 +24,7 @@ var current: float:
 			elif prev_cur < val:
 				decreased.emit()
 			emit_changed()
+			changed_with_previous_value.emit(prev_cur)
 
 var text_requires_update := true
 var text: String:
@@ -51,18 +53,26 @@ func set_to(amount) -> void:
 
 
 func add(amount) -> void:
+	if amount == 0.0:
+		return
 	current += amount
 
 
 func subtract(amount) -> void:
+	if amount == 0.0:
+		return
 	current -= amount
 
 
 func multiply(amount) -> void:
+	if amount == 1.0:
+		return
 	current *= amount
 
 
 func divide(amount) -> void:
+	if amount == 1.0:
+		return
 	current /= amount
 
 
