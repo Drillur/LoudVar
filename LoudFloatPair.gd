@@ -14,6 +14,9 @@ signal emptied
 var current: LoudFloat
 var total: LoudFloat
 
+var full := LoudBool.new(false)
+var empty := LoudBool.new(false)
+
 var text: String
 var text_requires_update := true
 var limit_to_zero := true
@@ -24,10 +27,42 @@ var limit_to_total := true
 func _init(base_value: float, base_total: float):
 	current = LoudFloat.new(base_value)
 	total = LoudFloat.new(base_total)
+	if current.equal(total.get_value()):
+		full.set_default_value(true)
+		full.reset()
+	elif current.equal(0):
+		empty.set_default_value(true)
+		empty.reset()
 	current.text_changed.connect(text_changed)
 	total.text_changed.connect(text_changed)
 	current.changed.connect(emit_changed)
 	total.changed.connect(emit_changed)
+	full.changed.connect(full_changed)
+	empty.changed.connect(empty_changed)
+
+
+
+# - Internal
+
+
+func text_changed() -> void:
+	text_requires_update = true
+
+
+func full_changed() -> void:
+	if full.is_true():
+		filled.emit()
+
+
+func empty_changed() -> void:
+	if empty.is_true():
+		emptied.emit()
+
+
+
+
+
+# - Action
 
 
 func do_not_limit_to_total() -> FloatPair:
@@ -40,27 +75,26 @@ func do_not_limit_to_zero() -> FloatPair:
 	return self
 
 
-func text_changed() -> void:
-	text_requires_update = true
-
-
-
 func add(amount: float) -> void:
-	if limit_to_total and is_full():
+	if limit_to_total and full.is_true():
 		return
 	current.add(amount)
 	clamp_current()
+	if empty.is_true():
+		empty.set_to(false)
 	if current.greater_equal(total.get_value()):
-		filled.emit()
+		full.set_to(true)
 
 
 func subtract(amount: float) -> void:
-	if limit_to_zero and is_empty():
+	if limit_to_zero and empty.is_true():
 		return
 	current.subtract(amount)
 	clamp_current()
+	if full.is_true():
+		full.set_to(false)
 	if current.equal(0):
-		emptied.emit()
+		empty.set_to(true)
 
 
 func clamp_current() -> void:
@@ -75,10 +109,13 @@ func clamp_current() -> void:
 
 
 func fill() -> void:
-	if is_not_full():
-		current.set_to(get_total())
-		current.increased.emit()
-		filled.emit()
+	if full.is_false():
+		add(get_deficit())
+
+
+func dump() -> void:
+	if empty.is_false():
+		subtract(get_current())
 
 
 
@@ -101,9 +138,13 @@ func get_current_percent() -> float:
 	return get_value() / get_total()
 
 
+func get_deficit() -> float:
+	return abs(get_total() - get_current())
+
+
 func get_surplus(amount: float) -> float:
-	if is_full() or get_value() + amount > get_total():
-		return (get_value() + amount) - get_total()
+	if full.is_true() or get_value() + amount > get_total():
+		return (get_current() + amount) - get_total()
 	return 0.0
 
 
@@ -115,12 +156,16 @@ func get_text() -> String:
 
 
 func is_full() -> bool:
-	return is_equal_approx(get_current(), get_total())
+	return full.is_true()
 
 
 func is_not_full() -> bool:
-	return not is_full()
+	return full.is_false()
 
 
 func is_empty() -> bool:
-	return current.equal(0.0)
+	return empty.is_true()
+
+
+func is_not_empty() -> bool:
+	return empty.is_false()
