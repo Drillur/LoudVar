@@ -36,6 +36,7 @@ func _init(base_value: float, base_total: float):
 	current.text_changed.connect(text_changed)
 	total.text_changed.connect(text_changed)
 	current.changed.connect(emit_changed)
+	total.changed.connect(total_changed)
 	total.changed.connect(emit_changed)
 	full.changed.connect(full_changed)
 	empty.changed.connect(empty_changed)
@@ -57,6 +58,13 @@ func full_changed() -> void:
 func empty_changed() -> void:
 	if empty.is_true():
 		emptied.emit()
+
+
+func total_changed() -> void:
+	if current.equal(get_total()):
+		full.set_to(true)
+	else:
+		full.set_to(false)
 
 
 

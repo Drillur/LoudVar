@@ -97,10 +97,10 @@ func divide(amount) -> void:
 
 func sync() -> void:
 	var new_value = base
-	new_value += added
-	new_value -= subtracted
 	new_value *= multiplied
 	new_value /= divided
+	new_value += added
+	new_value -= subtracted
 	set_to(new_value)
 
 
