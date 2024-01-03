@@ -148,6 +148,18 @@ func get_surplus(amount: float) -> float:
 	return 0.0
 
 
+func get_midpoint() -> float:
+	if is_full():
+		return get_total()
+	return (get_current() + get_total()) / 2
+
+
+func get_random_point_in_center() -> float:
+	if is_full():
+		return get_total()
+	return randf_range(get_current(), get_total())
+
+
 func get_text() -> String:
 	if text_requires_update:
 		text_requires_update = false

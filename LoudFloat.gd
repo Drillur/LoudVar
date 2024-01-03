@@ -35,6 +35,21 @@ var text: String:
 			text_changed.emit()
 		return text
 
+var pending := 0.0
+
+var added := 0.0
+var subtracted := 0.0
+var multiplied := 1.0
+var divided := 1.0
+
+var log := {
+	"added": {},
+	"subtracted": {},
+	"multiplied": {},
+	"divided": {},
+	"pending": {},
+}
+
 
 
 func _init(_base: float) -> void:
@@ -45,6 +60,10 @@ func _init(_base: float) -> void:
 
 func reset() -> void:
 	current = base
+	added = 0.0
+	subtracted = 0.0
+	multiplied = 1.0
+	divided = 1.0
 
 
 
@@ -76,11 +95,109 @@ func divide(amount) -> void:
 	current /= amount
 
 
+func sync() -> void:
+	var new_value = base
+	new_value += added
+	new_value -= subtracted
+	new_value *= multiplied
+	new_value /= divided
+	set_to(new_value)
+
+
+func increase_added(amount) -> void:
+	added += amount
+	sync()
+
+
+func decrease_added(amount) -> void:
+	added -= amount
+	sync()
+
+
+func increase_subtracted(amount) -> void:
+	subtracted += amount
+	sync()
+
+
+func decrease_subtracted(amount) -> void:
+	subtracted -= amount
+	sync()
+
+
+func increase_multiplied(amount) -> void:
+	multiplied *= amount
+	sync()
+
+
+func decrease_multiplied(amount) -> void:
+	multiplied /= amount
+	sync()
+
+
+func increase_divided(amount) -> void:
+	divided *= amount
+	sync()
+
+
+func decrease_divided(amount) -> void:
+	divided /= amount
+	sync()
+
+
+func add_change(category: String, source, amount: float) -> void:
+	if log[category].has(source):
+		if gv.dev_mode:
+			print_debug("This source already logged a change for this Value! Fix your code.")
+		return
+	log[category][source] = amount
+	match category:
+		"added":
+			increase_added(amount)
+		"subtracted":
+			increase_subtracted(amount)
+		"multiplied":
+			increase_multiplied(amount)
+		"divided":
+			increase_divided(amount)
+		"pending":
+			pending += amount
+
+
+func edit_change(category: String, source, amount: float) -> void:
+	if log[category].has(source):
+		remove_change(category, source)
+	add_change(category, source, amount)
+
+
+func remove_change(category: String, source) -> void:
+	if not source in log[category].keys():
+		return
+	var amount: float = log[category][source]
+	match category:
+		"added":
+			decrease_added(amount)
+		"subtracted":
+			decrease_subtracted(amount)
+		"multiplied":
+			decrease_multiplied(amount)
+		"divided":
+			decrease_divided(amount)
+		"pending":
+			pending -= amount
+	log[category].erase(source)
+
+
+
+
 
 # - Get
 
 func get_value() -> float:
 	return current
+
+
+func get_effective_value() -> float:
+	return current + pending
 
 
 func get_text() -> String:
@@ -125,3 +242,18 @@ func less_equal(val) -> bool:
 
 func less(val) -> bool:
 	return current < val
+
+
+
+
+# - Dev
+
+
+func report() -> void:
+	print("Report for ", self)
+	print("    Base: ", base)
+	print("    Added: ", added)
+	print("    Subtracted: ", subtracted)
+	print("    Multiplied: ", multiplied)
+	print("    Divided: ", divided)
+	print("    == Result: ", get_text())
