@@ -165,26 +165,28 @@ func add_change(category: String, source, amount: float) -> void:
 
 func edit_change(category: String, source, amount: float) -> void:
 	if log[category].has(source):
-		remove_change(category, source)
+		remove_change(category, source, false)
 	add_change(category, source, amount)
 
 
-func remove_change(category: String, source) -> void:
+func remove_change(category: String, source, sync_afterwards := true) -> void:
 	if not source in log[category].keys():
 		return
 	var amount: float = log[category][source]
 	match category:
 		"added":
-			decrease_added(amount)
+			added -= amount
 		"subtracted":
-			decrease_subtracted(amount)
+			subtracted -= amount
 		"multiplied":
-			decrease_multiplied(amount)
+			multiplied /= amount
 		"divided":
-			decrease_divided(amount)
+			divided /= amount
 		"pending":
 			pending -= amount
 	log[category].erase(source)
+	if sync_afterwards:
+		sync()
 
 
 

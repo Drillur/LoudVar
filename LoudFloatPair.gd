@@ -171,8 +171,16 @@ func get_random_point_in_center() -> float:
 func get_text() -> String:
 	if text_requires_update:
 		text_requires_update = false
-		text = current.get_text() + "/" + total.get_text()
+		text = get_current_text() + "/" + get_total_text()
 	return text
+
+
+func get_current_text() -> String:
+	return current.get_text()
+
+
+func get_total_text() -> String:
+	return total.get_text()
 
 
 func is_full() -> bool:
