@@ -35,8 +35,9 @@ func _init(base_value: float, base_total: float):
 		empty.reset()
 	current.text_changed.connect(text_changed)
 	total.text_changed.connect(text_changed)
+	current.changed.connect(check_if_full)
+	total.changed.connect(check_if_full)
 	current.changed.connect(emit_changed)
-	total.changed.connect(total_changed)
 	total.changed.connect(emit_changed)
 	full.changed.connect(full_changed)
 	empty.changed.connect(empty_changed)
@@ -60,13 +61,11 @@ func empty_changed() -> void:
 		emptied.emit()
 
 
-func total_changed() -> void:
+func check_if_full() -> void:
 	if current.equal(get_total()):
 		full.set_to(true)
 	else:
 		full.set_to(false)
-
-
 
 
 
@@ -162,7 +161,7 @@ func get_midpoint() -> float:
 	return (get_current() + get_total()) / 2
 
 
-func get_random_point_in_center() -> float:
+func get_random_point() -> float:
 	if is_full():
 		return get_total()
 	return randf_range(get_current(), get_total())

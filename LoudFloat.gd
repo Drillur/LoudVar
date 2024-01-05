@@ -11,6 +11,7 @@ signal changed_with_previous_value(previous_value)
 signal increased
 signal decreased
 signal text_changed
+signal renewed
 
 var base: float
 var current: float:
@@ -64,6 +65,7 @@ func reset() -> void:
 	subtracted = 0.0
 	multiplied = 1.0
 	divided = 1.0
+	renewed.emit()
 
 
 
