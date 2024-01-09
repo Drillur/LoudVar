@@ -3,18 +3,16 @@ extends Resource
 
 
 
-const saved_vars := [
-	"current",
-]
-
 signal increased
 signal decreased
 
 var base: int
-var current: int:
+@export var current: int:
 	set(val):
 		if current != val:
 			var previous_value = current
+			if val > limit:
+				val = limit
 			current = val
 			text_requires_update = true
 			if previous_value > val:
@@ -22,6 +20,7 @@ var current: int:
 			elif previous_value < val:
 				increased.emit()
 			emit_changed()
+var limit: int = 9223372036854775807
 
 var text_requires_update := true
 var text: String:
@@ -64,6 +63,10 @@ func divide(amount) -> void:
 	current /= amount
 
 
+func set_limit(val: int) -> void:
+	limit = val
+
+
 
 # - Get
 
@@ -90,6 +93,14 @@ func is_negative() -> bool:
 
 func is_not_positive() -> bool:
 	return is_negative()
+
+
+func at_limit() -> bool:
+	return equal(limit)
+
+
+func less_than_limit() -> bool:
+	return less(limit)
 
 
 func greater(val) -> bool:

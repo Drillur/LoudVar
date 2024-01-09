@@ -3,15 +3,11 @@ extends Resource
 
 
 
-const saved_vars := [
-	"current",
-]
-
 signal changed_with_color(color)
 
 var base: Color
 
-var current: Color:
+@export var current: Color:
 	set(val):
 		if current != val:
 			current = val

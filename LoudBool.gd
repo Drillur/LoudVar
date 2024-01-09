@@ -15,7 +15,7 @@ signal reset_value_became_false
 
 var base: bool
 
-var current: bool:
+@export var current: bool:
 	set(val):
 		if current != val:
 			current = val

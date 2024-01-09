@@ -11,7 +11,7 @@ const saved_vars := [
 signal filled
 signal emptied
 
-var current: LoudFloat
+@export var current: LoudFloat
 var total: LoudFloat
 
 var full := LoudBool.new(false)

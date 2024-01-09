@@ -13,8 +13,7 @@ signal decreased
 signal text_changed
 signal renewed
 
-var base: float
-var current: float:
+@export var current: float:
 	set(val):
 		if current != val:
 			var prev_cur = current
@@ -26,6 +25,9 @@ var current: float:
 				decreased.emit()
 			emit_changed()
 			changed_with_previous_value.emit(prev_cur)
+@export var pending := 0.0
+
+var base: float
 
 var text_requires_update := true
 var text: String:
@@ -36,14 +38,12 @@ var text: String:
 			text_changed.emit()
 		return text
 
-var pending := 0.0
-
 var added := 0.0
 var subtracted := 0.0
 var multiplied := 1.0
 var divided := 1.0
 
-var log := {
+var book := {
 	"added": {},
 	"subtracted": {},
 	"multiplied": {},
@@ -147,11 +147,11 @@ func decrease_divided(amount) -> void:
 
 
 func add_change(category: String, source, amount: float) -> void:
-	if log[category].has(source):
+	if book[category].has(source):
 		if gv.dev_mode:
 			print_debug("This source already logged a change for this Value! Fix your code.")
 		return
-	log[category][source] = amount
+	book[category][source] = amount
 	match category:
 		"added":
 			increase_added(amount)
@@ -166,15 +166,15 @@ func add_change(category: String, source, amount: float) -> void:
 
 
 func edit_change(category: String, source, amount: float) -> void:
-	if log[category].has(source):
+	if book[category].has(source):
 		remove_change(category, source, false)
 	add_change(category, source, amount)
 
 
 func remove_change(category: String, source, sync_afterwards := true) -> void:
-	if not source in log[category].keys():
+	if not source in book[category].keys():
 		return
-	var amount: float = log[category][source]
+	var amount: float = book[category][source]
 	match category:
 		"added":
 			added -= amount
@@ -186,7 +186,7 @@ func remove_change(category: String, source, sync_afterwards := true) -> void:
 			divided /= amount
 		"pending":
 			pending -= amount
-	log[category].erase(source)
+	book[category].erase(source)
 	if sync_afterwards:
 		sync()
 
