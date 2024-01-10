@@ -20,9 +20,9 @@ var base: int
 @export var current: int:
 	set(val):
 		if current != val:
-			var previous_value = current
 			if val > limit:
 				val = limit
+			var previous_value := current
 			current = val
 			text_requires_update = true
 			if previous_value > val:
@@ -176,6 +176,7 @@ func add_change(category: String, source, amount) -> void:
 
 # Note that specifically for this class, multiplying by a float could be pretty weird!
 # But because the book tracks the logs, it will be fine once you remove_change().
+# Also beware this int's limit!
 
 
 func edit_change(category: String, source, amount) -> void:
@@ -188,7 +189,7 @@ func edit_change(category: String, source, amount) -> void:
 func remove_change(category: String, source, sync_afterwards := true) -> void:
 	if not source in book[category].keys():
 		return
-	var amount: float = book[category][source]
+	var amount: int = book[category][source]
 	match category:
 		"added":
 			added -= amount

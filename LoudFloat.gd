@@ -21,6 +21,8 @@ signal renewed
 	set(val):
 		if current != val:
 			var prev_cur = current
+			if val < minimum_limit:
+				val = minimum_limit
 			current = val
 			text_requires_update = true
 			if prev_cur > val:
@@ -32,7 +34,6 @@ signal renewed
 @export var pending := 0.0
 
 var base: float
-
 var text_requires_update := true
 var text: String:
 	get:
@@ -41,6 +42,7 @@ var text: String:
 			text = Big.get_float_text(current)
 			text_changed.emit()
 		return text
+var minimum_limit := -1.79769e308
 
 var added := 0.0
 var subtracted := 0.0

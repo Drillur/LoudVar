@@ -1,4 +1,4 @@
-class_name FloatPair
+class_name LoudFloatPair
 extends Resource
 
 
@@ -78,12 +78,12 @@ func check_if_full() -> void:
 #region Action
 
 
-func do_not_limit_to_total() -> FloatPair:
+func do_not_limit_to_total() -> LoudFloatPair:
 	limit_to_total = false
 	return self
 
 
-func do_not_limit_to_zero() -> FloatPair:
+func do_not_limit_to_zero() -> LoudFloatPair:
 	limit_to_zero = false
 	return self
 
