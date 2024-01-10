@@ -16,9 +16,12 @@ var base: Color
 
 
 
-func _init(_base: Color) -> void:
-	base = _base
-	current = _base
+func _init(r, g := 1.0, b := 1.0, a := 1.0) -> void:
+	if r is Color:
+		base = r
+	else:
+		base = Color(r, g, b, a)
+	current = base
 
 
 

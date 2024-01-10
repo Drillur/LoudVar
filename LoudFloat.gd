@@ -168,7 +168,8 @@ func add_change(category: String, source, amount: float) -> void:
 func edit_change(category: String, source, amount: float) -> void:
 	if book[category].has(source):
 		remove_change(category, source, false)
-	add_change(category, source, amount)
+	if not is_zero_approx(amount):
+		add_change(category, source, amount)
 
 
 func remove_change(category: String, source, sync_afterwards := true) -> void:

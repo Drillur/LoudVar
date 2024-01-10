@@ -2,9 +2,6 @@ class_name LoudBool
 extends Resource
 
 
-const saved_vars := [
-	"current",
-]
 
 signal became_true
 signal became_false
