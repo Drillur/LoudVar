@@ -3,6 +3,13 @@ extends Resource
 
 
 
+# Use example: Literally Anything!
+# Adding signals to every bool in your script is a surefire way to make your code ugly
+# and to accidentally be inconsistent with your naming patterns.
+# Check out the super-readable methods below like 'is_true()' and 'invert()'!
+
+
+
 signal became_true
 signal became_false
 
@@ -39,7 +46,7 @@ func _init(_base: bool = false) -> void:
 
 
 
-# - Action
+#region Action
 
 
 func invert() -> void:
@@ -90,8 +97,10 @@ func connect_and_call(sig: String, method: Callable) -> void:
 	method.call()
 
 
+#endregion
 
-# - Get
+
+#region Get
 
 
 func is_true() -> bool:
@@ -136,3 +145,6 @@ func get_default_value() -> bool:
 
 func get_reset_value() -> bool:
 	return reset_value
+
+
+#endregion

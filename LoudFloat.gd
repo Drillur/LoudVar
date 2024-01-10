@@ -3,9 +3,13 @@ extends Resource
 
 
 
-const saved_vars := [
-	"current",
-]
+# Use example: Critical Multiplier!
+# When you roll for a crit, you also roll for the multiplier, be it x1.5 or x2.0
+# When that value changes, you will want to know about it and update labels in your game.
+# Connect to the 'changed' signal and you're done!
+# Don't forget to check out the super-readable methods like 'is_positive()' and 'less_equal()'
+
+
 
 signal changed_with_previous_value(previous_value)
 signal increased
@@ -43,6 +47,8 @@ var subtracted := 0.0
 var multiplied := 1.0
 var divided := 1.0
 
+# Book tracks every source of edits to the above values.
+
 var book := {
 	"added": {},
 	"subtracted": {},
@@ -59,6 +65,9 @@ func _init(_base: float) -> void:
 
 
 
+#region Action
+
+
 func reset() -> void:
 	current = base
 	added = 0.0
@@ -66,7 +75,6 @@ func reset() -> void:
 	multiplied = 1.0
 	divided = 1.0
 	renewed.emit()
-
 
 
 func set_to(amount) -> void:
@@ -149,7 +157,7 @@ func decrease_divided(amount) -> void:
 func add_change(category: String, source, amount: float) -> void:
 	if book[category].has(source):
 		if gv.dev_mode:
-			print_debug("This source already logged a change for this Value! Fix your code.")
+			print_debug("This source already logged a change for this LoudFloat (", self, ")! Fix your code you hack fraud.")
 		return
 	book[category][source] = amount
 	match category:
@@ -163,6 +171,11 @@ func add_change(category: String, source, amount: float) -> void:
 			increase_divided(amount)
 		"pending":
 			pending += amount
+
+
+# This has the functionality to be the only method of these 3 you'd need to use!
+# If you want to multiplicatively increase this float by 1.5,
+# call edit_change("multiplied", self, 1.5) -- simple as that!
 
 
 func edit_change(category: String, source, amount: float) -> void:
@@ -192,10 +205,10 @@ func remove_change(category: String, source, sync_afterwards := true) -> void:
 		sync()
 
 
+#endregion
 
 
-
-# - Get
+#region Get
 
 func get_value() -> float:
 	return current
@@ -249,9 +262,10 @@ func less(val) -> bool:
 	return current < val
 
 
+#endregion
 
 
-# - Dev
+#region Dev
 
 
 func report() -> void:
@@ -262,3 +276,6 @@ func report() -> void:
 	print("    Multiplied: ", multiplied)
 	print("    Divided: ", divided)
 	print("    == Result: ", get_text())
+
+
+#endregion

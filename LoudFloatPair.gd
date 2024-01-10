@@ -3,10 +3,13 @@ extends Resource
 
 
 
-const saved_vars := [
-	"current",
-	"total"
-]
+# Use example: Current and Total Experience!
+# I use the 'filled' signal below to know when a unit has gained enough xp to level up!
+# I would also ensure that limit_to_total is false, or your unit might waste xp.
+# Methods like 'get_current_percent()' and 'get_midpoint()' make this class invaluable.
+# You're currently wishing you had thought of this like I was when I was thinking of it!
+
+
 
 signal filled
 signal emptied
@@ -24,9 +27,10 @@ var limit_to_total := true
 
 
 
-func _init(base_value: float, base_total: float):
+func _init(base_value: float, base_total: float, _limit_to_total = true):
 	current = LoudFloat.new(base_value)
 	total = LoudFloat.new(base_total)
+	limit_to_total = _limit_to_total
 	if current.equal(total.get_value()):
 		full.set_default_value(true)
 		full.reset()
@@ -44,7 +48,7 @@ func _init(base_value: float, base_total: float):
 
 
 
-# - Internal
+#region Internal
 
 
 func text_changed() -> void:
@@ -68,8 +72,10 @@ func check_if_full() -> void:
 		full.set_to(false)
 
 
+#endregion
 
-# - Action
+
+#region Action
 
 
 func do_not_limit_to_total() -> FloatPair:
@@ -125,8 +131,10 @@ func dump() -> void:
 		subtract(get_current())
 
 
+#endregion
 
-# - Get
+
+#region Get
 
 
 func get_value() -> float:
@@ -196,3 +204,19 @@ func is_empty() -> bool:
 
 func is_not_empty() -> bool:
 	return empty.is_false()
+
+#endregion
+
+
+#region Dev
+
+
+func report() -> void:
+	print("Report for ", self)
+	print("Current:")
+	current.report()
+	print("Total:")
+	total.report()
+
+
+#endregion

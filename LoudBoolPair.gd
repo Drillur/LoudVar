@@ -3,6 +3,15 @@ extends Resource
 
 
 
+# Use example: Unlocked and Enabled for an Autobuyer!
+# So your player just unlocked an autobuyer upgrade. Good for them!
+# But now they want to turn it off! Well, no problem with this class!
+# With useful methods like 'are_either_false()' or 'set_to_left()',
+# this class will surely prevent your code from feeding you dinner!
+# ... get it?
+
+
+
 signal became_opposite
 signal became_true
 signal became_false

@@ -3,15 +3,19 @@ extends Resource
 
 
 
-const saved_vars := [
-	"current",
-]
+# Use example: Disguised Monster Name!
+# Maybe you've got a sneaky monster in your game which can change its appearance--
+# to make it sneakier, you also change its name to further sell the change!
+# Connect a method to the 'changed' signal and you can immediately update a label with the new name.
+
+
 
 var base: String
-var current: String:
+var text: String:
 	set(val):
-		current = val
-		changed.emit()
+		if text != val:
+			text = val
+			changed.emit()
 
 
 
@@ -21,24 +25,30 @@ func _init(_base := "") -> void:
 
 
 
-# - Action
+#region Action
 
 
 func reset() -> void:
-	current = base
+	text = base
 
 
 func set_to(val: String) -> void:
-	current = val
+	text = val
+
+
+#endregion
 
 
 
-# - Get
+#region Get
 
 
 func get_value() -> String:
-	return current
+	return text
 
 
 func get_text() -> String:
-	return current
+	return text
+
+
+#endregion

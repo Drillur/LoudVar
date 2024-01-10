@@ -3,6 +3,13 @@ extends Resource
 
 
 
+# This one is useful because you can store it as a reference on a node somewhere,
+# and then whenever the color changes, it will emit 'changed' and alert that node immediately
+# (after you connect it, of course)!
+# Except for that, this one sucks. It's only useful for the signal potential.
+
+
+
 signal changed_with_color(color)
 
 var base: Color
