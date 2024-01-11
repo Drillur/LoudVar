@@ -80,6 +80,7 @@ func set_reset_value(val: bool) -> void:
 func set_default_value(val: bool) -> void:
 	base = val
 	reset_value = val
+	set_to(val)
 
 
 func prestige() -> void:
