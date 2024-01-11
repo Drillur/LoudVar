@@ -31,7 +31,7 @@ signal renewed
 				decreased.emit()
 			emit_changed()
 			changed_with_previous_value.emit(prev_cur)
-@export var pending := 0.0
+var book := Book.new()
 
 var base: float
 var text_requires_update := true
@@ -44,24 +44,10 @@ var text: String:
 		return text
 var minimum_limit := -1.79769e308
 
-var added := 0.0
-var subtracted := 0.0
-var multiplied := 1.0
-var divided := 1.0
-
-# Book tracks every source of edits to the above values.
-
-var book := {
-	"added": {},
-	"subtracted": {},
-	"multiplied": {},
-	"divided": {},
-	"pending": {},
-}
-
 
 
 func _init(_base: float) -> void:
+	book.changed.connect(sync)
 	base = _base
 	current = base
 
@@ -71,11 +57,8 @@ func _init(_base: float) -> void:
 
 
 func reset() -> void:
+	book.reset()
 	current = base
-	added = 0.0
-	subtracted = 0.0
-	multiplied = 1.0
-	divided = 1.0
 	renewed.emit()
 
 
@@ -108,103 +91,17 @@ func divide(amount) -> void:
 
 
 func sync() -> void:
-	var new_value = base
-	new_value += added
-	new_value -= subtracted
-	new_value *= multiplied
-	new_value /= divided
-	set_to(new_value)
+	set_to(
+		book.get_changed_value_float(base)
+	)
 
 
-func increase_added(amount) -> void:
-	added += amount
-	sync()
+func edit_change(category: Book.Category, source, amount: float) -> void:
+	book.edit_change(category, source, amount)
 
 
-func decrease_added(amount) -> void:
-	added -= amount
-	sync()
-
-
-func increase_subtracted(amount) -> void:
-	subtracted += amount
-	sync()
-
-
-func decrease_subtracted(amount) -> void:
-	subtracted -= amount
-	sync()
-
-
-func increase_multiplied(amount) -> void:
-	multiplied *= amount
-	sync()
-
-
-func decrease_multiplied(amount) -> void:
-	multiplied /= amount
-	sync()
-
-
-func increase_divided(amount) -> void:
-	divided *= amount
-	sync()
-
-
-func decrease_divided(amount) -> void:
-	divided /= amount
-	sync()
-
-
-func add_change(category: String, source, amount: float) -> void:
-	if book[category].has(source):
-		if gv.dev_mode:
-			print_debug("This source already logged a change for this LoudFloat (", self, ")! Fix your code you hack fraud.")
-		return
-	book[category][source] = amount
-	match category:
-		"added":
-			increase_added(amount)
-		"subtracted":
-			increase_subtracted(amount)
-		"multiplied":
-			increase_multiplied(amount)
-		"divided":
-			increase_divided(amount)
-		"pending":
-			pending += amount
-
-
-# This has the functionality to be the only method of these 3 you'd need to use!
-# If you want to multiplicatively increase this float by 1.5,
-# call edit_change("multiplied", self, 1.5) -- simple as that!
-
-
-func edit_change(category: String, source, amount: float) -> void:
-	if book[category].has(source):
-		remove_change(category, source, false)
-	if not is_zero_approx(amount):
-		add_change(category, source, amount)
-
-
-func remove_change(category: String, source, sync_afterwards := true) -> void:
-	if not source in book[category].keys():
-		return
-	var amount: float = book[category][source]
-	match category:
-		"added":
-			added -= amount
-		"subtracted":
-			subtracted -= amount
-		"multiplied":
-			multiplied /= amount
-		"divided":
-			divided /= amount
-		"pending":
-			pending -= amount
-	book[category].erase(source)
-	if sync_afterwards:
-		sync()
+func remove_change(category: Book.Category, source) -> void:
+	book.remove_change(category, source, true)
 
 
 #endregion
@@ -217,7 +114,7 @@ func get_value() -> float:
 
 
 func get_effective_value() -> float:
-	return current + pending
+	return current + book.pending
 
 
 func get_text() -> String:
@@ -273,10 +170,10 @@ func less(val) -> bool:
 func report() -> void:
 	print("Report for ", self)
 	print("    Base: ", base)
-	print("    Added: ", added)
-	print("    Subtracted: ", subtracted)
-	print("    Multiplied: ", multiplied)
-	print("    Divided: ", divided)
+	print("    Added: ", book.added)
+	print("    Subtracted: ", book.subtracted)
+	print("    Multiplied: ", book.multiplied)
+	print("    Divided: ", book.divided)
 	print("    == Result: ", get_text())
 
 

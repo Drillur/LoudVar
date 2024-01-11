@@ -33,21 +33,10 @@ var base: int
 @export var pending := 0
 
 var limit: int = 9223372036854775807
+var book := Book.new()
 
-var added := 0
-var subtracted := 0
-var multiplied := 1
-var divided := 1
 
 # Book tracks every source of edits to the above values.
-
-var book := {
-	"added": {},
-	"subtracted": {},
-	"multiplied": {},
-	"divided": {},
-	"pending": {},
-}
 
 var text_requires_update := true
 var text: String:
@@ -62,6 +51,7 @@ var text: String:
 func _init(_base: int) -> void:
 	base = _base
 	current = base
+	book.changed.connect(sync)
 
 
 
@@ -69,11 +59,8 @@ func _init(_base: int) -> void:
 
 
 func reset() -> void:
+	book.reset()
 	current = base
-	added = 0
-	subtracted = 0
-	multiplied = 1
-	divided = 1
 	renewed.emit()
 
 
@@ -103,107 +90,17 @@ func divide(amount) -> void:
 
 
 func sync() -> void:
-	var new_value := base
-	new_value += added
-	new_value -= subtracted
-	new_value *= multiplied
-	new_value /= divided
-	set_to(new_value)
+	set_to(
+		book.get_changed_value_int(base)
+	)
 
 
-func increase_added(amount) -> void:
-	added += amount
-	sync()
+func edit_change(category: String, source, amount: float) -> void:
+	book.edit_change(category, source, amount)
 
 
-func decrease_added(amount) -> void:
-	added -= amount
-	sync()
-
-
-func increase_subtracted(amount) -> void:
-	subtracted += amount
-	sync()
-
-
-func decrease_subtracted(amount) -> void:
-	subtracted -= amount
-	sync()
-
-
-func increase_multiplied(amount) -> void:
-	multiplied *= amount
-	sync()
-
-
-func decrease_multiplied(amount) -> void:
-	multiplied /= amount
-	sync()
-
-
-func increase_divided(amount) -> void:
-	divided *= amount
-	sync()
-
-
-func decrease_divided(amount) -> void:
-	divided /= amount
-	sync()
-
-
-func add_change(category: String, source, amount) -> void:
-	if book[category].has(source):
-		if gv.dev_mode:
-			print_debug("This source already logged a change for this LoudInt (", self, ")! Fix your code you hack fraud.")
-		return
-	book[category][source] = amount
-	match category:
-		"added":
-			increase_added(amount)
-		"subtracted":
-			increase_subtracted(amount)
-		"multiplied":
-			increase_multiplied(amount)
-		"divided":
-			increase_divided(amount)
-		"pending":
-			pending += amount
-
-
-# This has the functionality to be the only method of these 3 you'd need to use!
-# If you want to temporarily add 3 to this int,
-# call edit_change("added", self, 3) -- simple as that!
-
-# Note that specifically for this class, multiplying by a float could be pretty weird!
-# But because the book tracks the logs, it will be fine once you remove_change().
-# Also beware this int's limit!
-
-
-func edit_change(category: String, source, amount) -> void:
-	if book[category].has(source):
-		remove_change(category, source, false)
-	if not is_zero_approx(amount):
-		add_change(category, source, amount)
-
-
-func remove_change(category: String, source, sync_afterwards := true) -> void:
-	if not source in book[category].keys():
-		return
-	var amount: int = book[category][source]
-	match category:
-		"added":
-			added -= amount
-		"subtracted":
-			subtracted -= amount
-		"multiplied":
-			multiplied /= amount
-		"divided":
-			divided /= amount
-		"pending":
-			pending -= amount
-	book[category].erase(source)
-	if sync_afterwards:
-		sync()
+func remove_change(category: String, source) -> void:
+	book.remove_change(category, source, true)
 
 
 #endregion
