@@ -95,7 +95,7 @@ func start(custom_wait_time := 0.0) -> void:
 	if custom_wait_time > 0.0:
 		wait_time.set_to(custom_wait_time)
 	elif random:
-		wait_time.edit_change("added", wait_time_range, wait_time_range.get_random_point())
+		wait_time.edit_change(Book.Category.ADDED, wait_time_range, wait_time_range.get_random_point())
 	
 	timer.start()
 	started.emit()
@@ -126,7 +126,7 @@ func divide_wait_time(source, value: float) -> void:
 
 
 func multiply_wait_time(source, value: float) -> void:
-	wait_time.edit_change("multiplied", source, value)
+	wait_time.edit_change(Book.Category.MULTIPLIED, source, value)
 
 
 #endregion
