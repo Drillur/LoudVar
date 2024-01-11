@@ -19,6 +19,8 @@ signal reset_value_became_false
 
 var base: bool
 
+var copied_bool: LoudBool
+
 @export var current: bool:
 	set(val):
 		if current != val:
@@ -44,6 +46,16 @@ func _init(_base: bool = false) -> void:
 	base = _base
 	current = _base
 
+
+
+#region Signals
+
+
+func copycat_changed() -> void:
+	set_to(copied_bool.get_value())
+
+
+#endregion
 
 
 #region Action
@@ -91,6 +103,10 @@ func reset() -> void:
 	current = base
 	reset_value = base
 
+
+func copycat(_copied_bool: LoudBool) -> void:
+	copied_bool = _copied_bool
+	copied_bool.changed.connect(copycat_changed)
 
 
 func connect_and_call(sig: String, method: Callable) -> void:

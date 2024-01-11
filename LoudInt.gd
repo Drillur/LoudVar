@@ -95,11 +95,11 @@ func sync() -> void:
 	)
 
 
-func edit_change(category: String, source, amount: float) -> void:
+func edit_change(category: Book.Category, source, amount: float) -> void:
 	book.edit_change(category, source, amount)
 
 
-func remove_change(category: String, source) -> void:
+func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
 
 

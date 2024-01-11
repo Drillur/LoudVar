@@ -17,12 +17,11 @@ signal stopped
 var timer: Timer
 var wait_time: LoudFloat # the number matching timer.wait_time
 var wait_time_range: LoudFloatPair # a range in which the timer wait_time will be randomly assigned
-var one_shot: bool
 var random: bool
 
 
 
-func _init(_wait_time := 0.0, _one_shot := true, optional_maximum_duration := 0.0) -> void:
+func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 	if optional_maximum_duration > 0.0:
 		wait_time_range = LoudFloatPair.new(_wait_time, optional_maximum_duration)
 		wait_time = LoudFloat.new(0.0)
@@ -38,7 +37,6 @@ func _init(_wait_time := 0.0, _one_shot := true, optional_maximum_duration := 0.
 	timer = Timer.new()
 	gv.add_child(timer)
 	
-	one_shot = _one_shot
 	timer.one_shot = false
 	timer.timeout.connect(timer_timeout)
 	if wait_time.get_value() > 0.05:
@@ -53,10 +51,7 @@ func _init(_wait_time := 0.0, _one_shot := true, optional_maximum_duration := 0.
 
 func timer_timeout() -> void:
 	set_timer_wait_time()
-	#timer.stop()
 	timeout.emit()
-	if not one_shot:
-		start(wait_time_range.get_random_point())
 
 
 func timer_started() -> void:
@@ -122,7 +117,7 @@ func set_maximum_duration(value: float) -> void:
 
 
 func divide_wait_time(source, value: float) -> void:
-	wait_time.edit_change("divided", source, value)
+	wait_time.edit_change(Book.Category.DIVIDED, source, value)
 
 
 func multiply_wait_time(source, value: float) -> void:
