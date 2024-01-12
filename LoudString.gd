@@ -23,7 +23,7 @@ var text: String:
 
 func _init(_base := "") -> void:
 	base = _base
-	set_to(base)
+	text = base
 
 
 

@@ -43,6 +43,7 @@ var text: String:
 			text_changed.emit()
 		return text
 var minimum_limit := -1.79769e308
+var copycat_float: LoudFloat
 
 
 
@@ -102,6 +103,21 @@ func edit_change(category: Book.Category, source, amount: float) -> void:
 
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
+
+
+func set_default_value(val: float) -> void:
+	base = val
+	set_to(val)
+
+
+func copycat(loud_float: LoudFloat) -> void:
+	copycat_float = loud_float
+	copycat_float.changed.connect(copycat_changed)
+	copycat_changed()
+
+
+func copycat_changed() -> void:
+	set_to(copycat_float.get_value())
 
 
 #endregion

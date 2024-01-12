@@ -147,6 +147,10 @@ func is_false() -> bool:
 	return are_either_false()
 
 
+func get_value() -> Array[bool]:
+	return [get_left(), get_right()]
+
+
 #endregion
 
 

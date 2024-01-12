@@ -316,7 +316,7 @@ func edit_change(category: Book.Category, source, amount) -> void:
 		category in [Book.Category.ADDED, Book.Category.SUBTRACTED]
 		and (
 			(amount is Big and amount.equal(0))
-			or is_zero_approx(amount)
+			or not amount is Big and is_zero_approx(amount)
 		)
 	):
 		effectively_removing = true
