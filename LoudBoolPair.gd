@@ -46,7 +46,7 @@ func left_or_right_changed() -> void:
 		became_true.emit()
 	elif are_opposite():
 		became_opposite.emit()
-	elif are_false():
+	elif are_either_false():
 		became_false.emit()
 	emit_changed()
 
@@ -127,6 +127,10 @@ func are_true() -> bool:
 	return left.is_true() and right.is_true()
 
 
+func is_true() -> bool:
+	return are_true()
+
+
 func are_opposite() -> bool:
 	return (
 		left_is_and_right_isnt()
@@ -139,6 +143,10 @@ func are_false() -> bool:
 	return left.is_false() and right.is_false()
 
 
+func is_false() -> bool:
+	return are_either_false()
+
+
 #endregion
 
 
@@ -147,8 +155,14 @@ func are_false() -> bool:
 
 func remind_me() -> void:
 	print("Reminder for LoudBoolPair ", self, ":")
-	print(" - Left bool: ", left_reminder)
-	print(" - Right bool: ", right_reminder)
+	print(" - Left: ", left_reminder)
+	print(" - Right: ", right_reminder)
+
+
+func report() -> void:
+	print("Report for LoudBoolPair ", self, ":")
+	print(" - Left: ", str(get_left()) + (" (%s)" % left_reminder) if left_reminder != "" else "")
+	print(" - Right: ", str(get_right()) + (" (%s)" % right_reminder) if right_reminder != "" else "")
 
 
 #endregion

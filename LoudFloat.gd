@@ -31,7 +31,7 @@ signal renewed
 				decreased.emit()
 			emit_changed()
 			changed_with_previous_value.emit(prev_cur)
-var book := Book.new()
+@export var book := Book.new(Book.Type.FLOAT)
 
 var base: float
 var text_requires_update := true
@@ -169,12 +169,12 @@ func less(val) -> bool:
 
 func report() -> void:
 	print("Report for ", self)
-	print("    Base: ", base)
-	print("    Added: ", book.added)
-	print("    Subtracted: ", book.subtracted)
-	print("    Multiplied: ", book.multiplied)
-	print("    Divided: ", book.divided)
-	print("    == Result: ", get_text())
+	print(" - Base: ", base)
+	print(" - Added: ", book.get_bv_added())
+	print(" - Subtracted: ", book.get_bv_subtracted())
+	print(" - Multiplied: ", book.get_bv_multiplied())
+	print(" - Divided: ", book.get_bv_divided())
+	print(" - == Result: ", get_text())
 
 
 #endregion

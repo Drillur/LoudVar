@@ -37,11 +37,10 @@ func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 	timer = Timer.new()
 	gv.add_child(timer)
 	
-	timer.one_shot = false
+	timer.one_shot = true
 	timer.timeout.connect(timer_timeout)
 	if wait_time.get_value() > 0.05:
 		timer.wait_time = wait_time.get_value()
-	started.connect(timer_started)
 
 
 
@@ -52,10 +51,6 @@ func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 func timer_timeout() -> void:
 	set_timer_wait_time()
 	timeout.emit()
-
-
-func timer_started() -> void:
-	pass
 
 
 func wait_time_changed_receiver() -> void:
@@ -116,11 +111,11 @@ func set_maximum_duration(value: float) -> void:
 	random = true
 
 
-func divide_wait_time(source, value: float) -> void:
+func edit_divided(source, value: float) -> void:
 	wait_time.edit_change(Book.Category.DIVIDED, source, value)
 
 
-func multiply_wait_time(source, value: float) -> void:
+func edit_multiplied(source, value: float) -> void:
 	wait_time.edit_change(Book.Category.MULTIPLIED, source, value)
 
 
@@ -174,3 +169,12 @@ func get_text() -> String:
 
 
 #endregion
+
+
+#region Dev
+
+
+func report() -> void:
+	print("Report for LoudTimer ", self, ":")
+	print(" - Wait time: ", wait_time.get_text())
+	print(" - Wait time range: ", wait_time_range.get_text())

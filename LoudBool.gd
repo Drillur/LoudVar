@@ -107,11 +107,7 @@ func reset() -> void:
 func copycat(_copied_bool: LoudBool) -> void:
 	copied_bool = _copied_bool
 	copied_bool.changed.connect(copycat_changed)
-
-
-func connect_and_call(sig: String, method: Callable) -> void:
-	get(sig).connect(method)
-	method.call()
+	copycat_changed()
 
 
 #endregion

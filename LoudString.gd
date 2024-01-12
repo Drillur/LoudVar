@@ -10,6 +10,8 @@ extends Resource
 
 
 
+signal renewed
+
 var base: String
 var text: String:
 	set(val):
@@ -21,7 +23,7 @@ var text: String:
 
 func _init(_base := "") -> void:
 	base = _base
-	reset()
+	set_to(base)
 
 
 
@@ -30,6 +32,7 @@ func _init(_base := "") -> void:
 
 func reset() -> void:
 	text = base
+	renewed.emit()
 
 
 func set_to(val: String) -> void:
@@ -49,6 +52,10 @@ func get_value() -> String:
 
 func get_text() -> String:
 	return text
+
+
+func has_text() -> bool:
+	return text != ""
 
 
 #endregion

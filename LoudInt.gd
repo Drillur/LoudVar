@@ -15,25 +15,32 @@ extends Resource
 signal increased
 signal decreased
 signal renewed
+signal became_non_zero
+signal became_zero
+signal value_set
+signal value_set_greater_zero
 
 var base: int
 @export var current: int:
 	set(val):
+		var previous_value := current
 		if current != val:
 			if val > limit:
 				val = limit
-			var previous_value := current
 			current = val
 			text_requires_update = true
+			if is_zero_approx(previous_value):
+				became_non_zero.emit()
+			elif is_zero_approx(current):
+				became_zero.emit()
 			if previous_value > val:
 				decreased.emit()
 			elif previous_value < val:
 				increased.emit()
 			emit_changed()
-@export var pending := 0
 
 var limit: int = 9223372036854775807
-var book := Book.new()
+@export var book := Book.new(Book.Type.INT)
 
 
 # Book tracks every source of edits to the above values.
@@ -67,6 +74,9 @@ func reset() -> void:
 
 func set_to(amount) -> void:
 	current = amount
+	value_set.emit()
+	if amount > 0:
+		value_set_greater_zero.emit()
 
 
 func set_limit(val: int) -> void:
