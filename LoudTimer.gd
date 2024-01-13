@@ -175,6 +175,6 @@ func get_text() -> String:
 
 
 func report() -> void:
-	print("Report for LoudTimer ", self, ":")
-	print(" - Wait time: ", wait_time.get_text())
-	print(" - Wait time range: ", wait_time_range.get_text())
+	print_debug("Report for LoudTimer ", self, ":")
+	print_debug(" - Wait time: ", wait_time.get_text())
+	print_debug(" - Wait time range: ", wait_time_range.get_text())

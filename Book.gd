@@ -269,7 +269,7 @@ func reset() -> void:
 	set_divided(1)
 	set_pending(0)
 	renewed.emit()
-	emit_changed()
+	#emit_changed()
 
 
 func add_change(category: Book.Category, source, amount) -> void:
@@ -304,24 +304,24 @@ func add_change(category: Book.Category, source, amount) -> void:
 
 func edit_change(category: Book.Category, source, amount) -> void:
 	var effectively_removing := false
-	if (
-		category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]
-		and (
-			(amount is Big and amount.equal(1.0))
-			or (not amount is Big and is_equal_approx(amount, 1.0))
-		)
-	):
-		effectively_removing = true
-	elif (
-		category in [Book.Category.ADDED, Book.Category.SUBTRACTED]
-		and (
-			(amount is Big and amount.equal(0))
-			or not amount is Big and is_zero_approx(amount)
-		)
-	):
-		effectively_removing = true
-	
 	if book[category].has(source):
+		match type:
+			Type.INT, Type.FLOAT:
+				if category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]:
+					if is_equal_approx(amount, 1.0):
+						effectively_removing = true
+				elif category in [Book.Category.ADDED, Book.Category.SUBTRACTED]:
+					if is_zero_approx(amount):
+						effectively_removing = true
+			Type.BIG:
+				if not amount is Big:
+					amount = Big.new(amount)
+				if category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]:
+					if amount.equal(1):
+						effectively_removing = true
+				elif category in [Book.Category.ADDED, Book.Category.SUBTRACTED]:
+					if amount.equal(0):
+						effectively_removing = true
 		remove_change(category, source, effectively_removing)
 	if not effectively_removing:
 		add_change(category, source, amount)
@@ -343,7 +343,9 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 		Book.Category.PENDING:
 			subtract_pending(amount)
 	book[category].erase(source)
-	if sync_afterwards and category != Book.Category.PENDING:
+	if category == Book.Category.PENDING:
+		return
+	if sync_afterwards:
 		emit_changed()
 
 
@@ -368,10 +370,18 @@ func get_changed_value_float(base: float) -> float:
 
 
 func get_changed_value_big(base: Dictionary) -> Big:
-	# remove if not using a Big number class
-	return Big.new(base).a(get_bv_added()).s(
-		get_bv_subtracted()
-	).m(get_bv_multiplied()).d(get_bv_divided())
+	var result = Big.new(base)
+	#print_debug("base: ", result.text)
+	result.a(get_bv_added())
+	#print_debug("added: ", get_bv_added().text, " = ", result.text)
+	result.s(get_bv_subtracted())
+	#print_debug("sb: ", get_bv_subtracted().text, " = ", result.text)
+	result.m(get_bv_multiplied())
+	#print_debug("m: ", get_bv_multiplied().text, " = ", result.text)
+	result.d(get_bv_divided())
+	#print_debug("d: ", get_bv_divided().text, " = ", result.text)
+	#print_debug("RESULT: ", result.text)
+	return result
 
 
 func get_pending() -> Big:
@@ -379,3 +389,17 @@ func get_pending() -> Big:
 
 
 #endregion
+
+
+#region Dev
+
+
+func report() -> void:
+	print_debug("BOOK REPORT ** (", self, ")")
+	for category in book:
+		print_debug(" - ", Category.keys()[category])
+		for source in book[category]:
+			if type == Type.BIG:
+				print_debug("    - ", source, ": ", book[category][source].get_text())
+			else:
+				print_debug("    - ", source, ": ", book[category][source])

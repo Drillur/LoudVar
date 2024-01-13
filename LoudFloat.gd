@@ -43,7 +43,7 @@ var text: String:
 			text_changed.emit()
 		return text
 var minimum_limit := -1.79769e308
-var copycat_float: LoudFloat
+var copycat_var: LoudFloat
 
 
 
@@ -101,6 +101,10 @@ func edit_change(category: Book.Category, source, amount: float) -> void:
 	book.edit_change(category, source, amount)
 
 
+func edit_multiplied(source, amount: float) -> void:
+	edit_change(Book.Category.MULTIPLIED, source, amount)
+
+
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
 
@@ -111,13 +115,14 @@ func set_default_value(val: float) -> void:
 
 
 func copycat(loud_float: LoudFloat) -> void:
-	copycat_float = loud_float
-	copycat_float.changed.connect(copycat_changed)
+	set_default_value(0.0)
+	copycat_var = loud_float
+	copycat_var.changed.connect(copycat_changed)
 	copycat_changed()
 
 
 func copycat_changed() -> void:
-	set_to(copycat_float.get_value())
+	book.edit_change(Book.Category.ADDED, copycat_var, copycat_var.get_value())
 
 
 #endregion
@@ -184,13 +189,13 @@ func less(val) -> bool:
 
 
 func report() -> void:
-	print("Report for ", self)
-	print(" - Base: ", base)
-	print(" - Added: ", book.get_bv_added())
-	print(" - Subtracted: ", book.get_bv_subtracted())
-	print(" - Multiplied: ", book.get_bv_multiplied())
-	print(" - Divided: ", book.get_bv_divided())
-	print(" - == Result: ", get_text())
+	print_debug("Report for ", self)
+	print_debug(" - Base: ", base)
+	print_debug(" - Added: ", book.get_bv_added())
+	print_debug(" - Subtracted: ", book.get_bv_subtracted())
+	print_debug(" - Multiplied: ", book.get_bv_multiplied())
+	print_debug(" - Divided: ", book.get_bv_divided())
+	print_debug(" - == Result: ", get_text())
 
 
 #endregion

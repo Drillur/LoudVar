@@ -31,15 +31,6 @@ var copied_bool: LoudBool
 			else:
 				became_false.emit()
 
-var reset_value := false:
-	set(val):
-		if reset_value != val:
-			reset_value = val
-			reset_value_changed.emit()
-			if val:
-				reset_value_became_true.emit()
-			else:
-				reset_value_became_false.emit()
 
 
 func _init(_base: bool = false) -> void:
@@ -65,6 +56,10 @@ func invert() -> void:
 	set_to(not current)
 
 
+func invert_default_value() -> void:
+	set_default_value(not base)
+
+
 func set_true() -> void:
 	set_to(true)
 
@@ -77,31 +72,13 @@ func set_to(val: bool) -> void:
 	current = val
 
 
-func set_reset_value_true() -> void:
-	set_reset_value(true)
-
-
-func set_reset_value_false() -> void:
-	set_reset_value(false)
-
-
-func set_reset_value(val: bool) -> void:
-	reset_value = val
-
-
 func set_default_value(val: bool) -> void:
 	base = val
-	reset_value = val
 	set_to(val)
-
-
-func prestige() -> void:
-	current = reset_value
 
 
 func reset() -> void:
 	current = base
-	reset_value = base
 
 
 func copycat(_copied_bool: LoudBool) -> void:
@@ -132,14 +109,6 @@ func is_not_true() -> bool:
 	return is_false()
 
 
-func is_true_on_reset() -> bool:
-	return true if reset_value else false
-
-
-func is_false_on_reset() -> bool:
-	return not is_true_on_reset()
-
-
 func is_true_by_default() -> bool:
 	return true if base else false
 
@@ -154,10 +123,6 @@ func get_value() -> bool:
 
 func get_default_value() -> bool:
 	return base
-
-
-func get_reset_value() -> bool:
-	return reset_value
 
 
 #endregion

@@ -19,6 +19,7 @@ signal became_non_zero
 signal became_zero
 signal value_set
 signal value_set_greater_zero
+signal value_set_to_zero
 
 var base: int
 @export var current: int:
@@ -39,9 +40,9 @@ var base: int
 				increased.emit()
 			emit_changed()
 
+var copycat_var: LoudInt
 var limit: int = 9223372036854775807
 @export var book := Book.new(Book.Type.INT)
-
 
 # Book tracks every source of edits to the above values.
 
@@ -77,6 +78,8 @@ func set_to(amount) -> void:
 	value_set.emit()
 	if amount > 0:
 		value_set_greater_zero.emit()
+	elif is_zero_approx(amount):
+		value_set_to_zero.emit()
 
 
 func set_limit(val: int) -> void:
@@ -111,6 +114,22 @@ func edit_change(category: Book.Category, source, amount: float) -> void:
 
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
+
+
+func set_default_value(val: int) -> void:
+	base = val
+	set_to(val)
+
+
+func copycat(loud_int: LoudInt) -> void:
+	set_default_value(0)
+	copycat_var = loud_int
+	copycat_var.changed.connect(copycat_changed)
+	copycat_changed()
+
+
+func copycat_changed() -> void:
+	book.edit_change(Book.Category.ADDED, copycat_var, copycat_var.get_value())
 
 
 #endregion

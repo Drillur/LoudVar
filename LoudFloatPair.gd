@@ -212,10 +212,10 @@ func is_not_empty() -> bool:
 
 
 func report() -> void:
-	print("Report for ", self)
-	print("Current:")
+	print_debug("Report for ", self)
+	print_debug(" - Current:")
 	current.report()
-	print("Total:")
+	print_debug(" - Total:")
 	total.report()
 
 

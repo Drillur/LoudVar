@@ -158,15 +158,15 @@ func get_value() -> Array[bool]:
 
 
 func remind_me() -> void:
-	print("Reminder for LoudBoolPair ", self, ":")
-	print(" - Left: ", left_reminder)
-	print(" - Right: ", right_reminder)
+	print_debug("Reminder for LoudBoolPair ", self, ":")
+	print_debug(" - Left: ", left_reminder)
+	print_debug(" - Right: ", right_reminder)
 
 
 func report() -> void:
-	print("Report for LoudBoolPair ", self, ":")
-	print(" - Left: ", str(get_left()) + (" (%s)" % left_reminder) if left_reminder != "" else "")
-	print(" - Right: ", str(get_right()) + (" (%s)" % right_reminder) if right_reminder != "" else "")
+	print_debug("Report for LoudBoolPair ", self, ":")
+	print_debug(" - Left: ", str(get_left()) + (" (%s)" % left_reminder) if left_reminder != "" else "")
+	print_debug(" - Right: ", str(get_right()) + (" (%s)" % right_reminder) if right_reminder != "" else "")
 
 
 #endregion
