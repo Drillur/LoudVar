@@ -195,3 +195,31 @@ func less(val) -> bool:
 
 
 #endregion
+
+
+#region Dev
+
+
+var variable_name: String
+
+
+func report_on_changed(_variable_name: String):
+	variable_name = _variable_name
+	changed.connect(simple_report)
+
+
+func simple_report() -> void:
+	print(variable_name, " LoudInt changed to ", get_text())
+
+
+func report() -> void:
+	print_debug("Report for ", self if variable_name == "" else variable_name)
+	print_debug(" - Base: ", base)
+	print_debug(" - Added: ", book.get_bv_added())
+	print_debug(" - Subtracted: ", book.get_bv_subtracted())
+	print_debug(" - Multiplied: ", book.get_bv_multiplied())
+	print_debug(" - Divided: ", book.get_bv_divided())
+	print_debug(" - == Result: ", get_text())
+
+
+#endregion

@@ -156,6 +156,8 @@ func add_multiplied(value):
 
 
 func subtract_multiplied(value):
+	if would_divide_by_zero(value):
+		return
 	match type:
 		Type.INT:
 			book_vars_i.multiplied /= value
@@ -196,6 +198,8 @@ func add_divided(value):
 
 
 func subtract_divided(value):
+	if would_divide_by_zero(value):
+		return
 	match type:
 		Type.INT:
 			book_vars_i.divided /= value
@@ -353,6 +357,17 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 
 
 #region Get
+
+
+func would_divide_by_zero(value) -> bool:
+	match type:
+		Type.INT, Type.FLOAT:
+			if is_zero_approx(value):
+				return true
+		Type.BIG:
+			if value.equal(0):
+				return true
+	return false
 
 
 func get_changed_value_int(base: int) -> int:

@@ -101,12 +101,32 @@ func edit_change(category: Book.Category, source, amount: float) -> void:
 	book.edit_change(category, source, amount)
 
 
+func edit_added(source, amount: float) -> void:
+	edit_change(Book.Category.ADDED, source, amount)
+
+
+func edit_subtracted(source, amount: float) -> void:
+	edit_change(Book.Category.SUBTRACTED, source, amount)
+
+
 func edit_multiplied(source, amount: float) -> void:
 	edit_change(Book.Category.MULTIPLIED, source, amount)
 
 
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
+
+
+func remove_added(source) -> void:
+	remove_change(Book.Category.ADDED, source)
+
+
+func remove_subtracted(source) -> void:
+	remove_change(Book.Category.SUBTRACTED, source)
+
+
+func remove_multiplied(source) -> void:
+	remove_change(Book.Category.MULTIPLIED, source)
 
 
 func set_default_value(val: float) -> void:
@@ -188,8 +208,20 @@ func less(val) -> bool:
 #region Dev
 
 
+var variable_name: String
+
+
+func report_on_changed(_variable_name: String):
+	variable_name = _variable_name
+	changed.connect(simple_report)
+
+
+func simple_report() -> void:
+	print(variable_name, " LoudFloat changed to ", get_text())
+
+
 func report() -> void:
-	print_debug("Report for ", self)
+	print_debug("Report for ", self if variable_name == "" else variable_name)
 	print_debug(" - Base: ", base)
 	print_debug(" - Added: ", book.get_bv_added())
 	print_debug(" - Subtracted: ", book.get_bv_subtracted())
