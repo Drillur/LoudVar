@@ -122,7 +122,7 @@ func set_default_value(val: int) -> void:
 
 
 func copycat(loud_int: LoudInt) -> void:
-	set_default_value(0)
+	set_default_value(0.0)
 	copycat_var = loud_int
 	copycat_var.changed.connect(copycat_changed)
 	copycat_changed()

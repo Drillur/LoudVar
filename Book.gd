@@ -156,8 +156,6 @@ func add_multiplied(value):
 
 
 func subtract_multiplied(value):
-	if would_divide_by_zero(value):
-		return
 	match type:
 		Type.INT:
 			book_vars_i.multiplied /= value
@@ -198,8 +196,6 @@ func add_divided(value):
 
 
 func subtract_divided(value):
-	if would_divide_by_zero(value):
-		return
 	match type:
 		Type.INT:
 			book_vars_i.divided /= value
@@ -281,6 +277,9 @@ func add_change(category: Book.Category, source, amount) -> void:
 		if gv.dev_mode:
 			print_debug("This source already logged a change for this LoudInt (", self, ")! Fix your code you hack fraud.")
 		return
+	if change_would_be_redundant(category, amount):
+		return
+	
 	book[category][source] = amount
 	match category:
 		Book.Category.ADDED:
@@ -335,6 +334,11 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 	if not source in book[category].keys():
 		return
 	var amount = book[category][source]
+	# if amount == 0, just stop here and then do a complete re-sync of everything in the book. but erase source first.
+	if would_divide_by_zero(amount):
+		book[category].erase(source)
+		full_resync()
+		return
 	match category:
 		Book.Category.ADDED:
 			subtract_added(amount)
@@ -353,10 +357,45 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 		emit_changed()
 
 
+func full_resync() -> void:
+	set_added(0)
+	set_subtracted(0)
+	set_multiplied(1)
+	set_divided(1)
+	for value in book[Category.ADDED].values():
+		add_added(value)
+	for value in book[Category.SUBTRACTED].values():
+		add_subtracted(value)
+	for value in book[Category.MULTIPLIED].values():
+		add_multiplied(value)
+	for value in book[Category.DIVIDED].values():
+		add_divided(value)
+	emit_changed()
+
+
 #endregion
 
 
 #region Get
+
+
+func change_would_be_redundant(category: Book.Category, amount) -> bool:
+	match category:
+		Book.Category.MULTIPLIED, Book.Category.DIVIDED:
+			if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
+				if is_equal_approx(amount, 1.0):
+					return true
+			else:
+				if amount.equal(1):
+					return true
+		Book.Category.ADDED, Book.Category.SUBTRACTED:
+			if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
+				if is_zero_approx(amount):
+					return true
+			else:
+				if amount.equal(0):
+					return true
+	return false
 
 
 func would_divide_by_zero(value) -> bool:
@@ -386,16 +425,10 @@ func get_changed_value_float(base: float) -> float:
 
 func get_changed_value_big(base: Dictionary) -> Big:
 	var result = Big.new(base)
-	#print_debug("base: ", result.text)
 	result.a(get_bv_added())
-	#print_debug("added: ", get_bv_added().text, " = ", result.text)
 	result.s(get_bv_subtracted())
-	#print_debug("sb: ", get_bv_subtracted().text, " = ", result.text)
 	result.m(get_bv_multiplied())
-	#print_debug("m: ", get_bv_multiplied().text, " = ", result.text)
 	result.d(get_bv_divided())
-	#print_debug("d: ", get_bv_divided().text, " = ", result.text)
-	#print_debug("RESULT: ", result.text)
 	return result
 
 
@@ -410,11 +443,11 @@ func get_pending() -> Big:
 
 
 func report() -> void:
-	print_debug("BOOK REPORT ** (", self, ")")
+	printt("BOOK REPORT ** (", self, ")")
 	for category in book:
-		print_debug(" - ", Category.keys()[category])
+		printt(" - ", Category.keys()[category])
 		for source in book[category]:
 			if type == Type.BIG:
-				print_debug("    - ", source, ": ", book[category][source].get_text())
+				printt("    - ", source, ": ", book[category][source].get_text())
 			else:
-				print_debug("    - ", source, ": ", book[category][source])
+				printt("    - ", source, ": ", book[category][source])
