@@ -74,5 +74,5 @@ func subtract_divided(amount: float) -> void:
 
 
 
-func get_changed_value(base: float) -> int:
+func get_changed_value(base: float) -> float:
 	return (base + added - subtracted) * multiplied / divided
