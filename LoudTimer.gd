@@ -33,9 +33,8 @@ func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 	wait_time.changed.connect(wait_time_changed_receiver)
 	wait_time.minimum_limit = 0.05
 	
-	# You will have to replace this line with your own singleton. Mine is GlobalVariables, thus gv
 	timer = Timer.new()
-	gv.add_child(timer)
+	gv.add_child(timer) # You will have to replace this line with your own singleton. Mine is gv (GlobalVariables)
 	
 	timer.one_shot = true
 	timer.timeout.connect(timer_timeout)
@@ -60,6 +59,9 @@ func wait_time_changed_receiver() -> void:
 
 func set_timer_wait_time() -> void:
 	if are_wait_times_equal():
+		return
+	if wait_time.get_value() == 0:
+		print_debug("Yeah don't let this happen!")
 		return
 	timer.wait_time = wait_time.get_value()
 	wait_time_changed.emit()

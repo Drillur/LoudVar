@@ -93,7 +93,7 @@ func divide(amount) -> void:
 
 func sync() -> void:
 	set_to(
-		book.get_changed_value_float(base)
+		book.get_changed_value(base)
 	)
 
 
