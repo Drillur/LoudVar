@@ -147,6 +147,8 @@ func add_change(category: Book.Category, source, amount) -> void:
 	if change_would_be_redundant(category, amount):
 		return
 	
+	if amount is Big:
+		amount = Big.new(amount)
 	book[category][source] = amount
 	match category:
 		Book.Category.ADDED:
@@ -246,9 +248,12 @@ func get_changed_value(base):
 
 
 func report() -> void:
-	printt("BOOK REPORT ** (", self, ")")
+	printt("Book Report (", self, ")")
 	for category in book:
-		printt(" - ", Category.keys()[category])
+		var bv = call("get_bv_" + Category.keys()[category].to_lower())
+		if bv is Big:
+			bv = bv.get_text()
+		printt(" - ", Category.keys()[category], "(" + bv + ")")
 		for source in book[category]:
 			if type == Type.BIG:
 				printt("    - ", source, ": ", book[category][source].get_text())

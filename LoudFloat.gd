@@ -113,6 +113,10 @@ func edit_multiplied(source, amount: float) -> void:
 	edit_change(Book.Category.MULTIPLIED, source, amount)
 
 
+func edit_divided(source, amount: float) -> void:
+	edit_change(Book.Category.DIVIDED, source, amount)
+
+
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
 
