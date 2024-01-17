@@ -20,6 +20,7 @@ signal became_zero
 signal value_set
 signal value_set_greater_zero
 signal value_set_to_zero
+signal set_to_same_value
 
 var base: int
 @export var current: int:
@@ -39,6 +40,8 @@ var base: int
 			elif previous_value < val:
 				increased.emit()
 			emit_changed()
+		else:
+			set_to_same_value.emit()
 
 var copycat_var: LoudInt
 var limit: int = 9223372036854775807

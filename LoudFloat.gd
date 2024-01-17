@@ -16,6 +16,7 @@ signal increased
 signal decreased
 signal text_changed
 signal renewed
+signal amount_increased(amount)
 
 @export var current: float:
 	set(val):
@@ -71,6 +72,7 @@ func add(amount) -> void:
 	if amount == 0.0:
 		return
 	current += amount
+	amount_increased.emit(amount)
 
 
 func subtract(amount) -> void:

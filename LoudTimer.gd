@@ -13,6 +13,7 @@ signal timeout
 signal started
 signal wait_time_changed
 signal stopped
+signal duration_elapsed_when_stopped(duration)
 
 var timer: Timer
 var wait_time: LoudFloat # the number matching timer.wait_time
@@ -95,6 +96,7 @@ func start(custom_wait_time := 0.0) -> void:
 
 func stop() -> void:
 	if is_running():
+		duration_elapsed_when_stopped.emit(timer.wait_time - timer.time_left)
 		timer.stop()
 		stopped.emit()
 
