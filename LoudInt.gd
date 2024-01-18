@@ -125,7 +125,7 @@ func set_default_value(val: int) -> void:
 
 
 func copycat(loud_int: LoudInt) -> void:
-	set_default_value(0.0)
+	set_default_value(0)
 	copycat_var = loud_int
 	copycat_var.changed.connect(copycat_changed)
 	copycat_changed()
@@ -216,7 +216,7 @@ func simple_report() -> void:
 
 
 func report() -> void:
-	print_debug("Report for ", self if variable_name == "" else variable_name)
+	print_debug("Report for ", str(self) if variable_name == "" else variable_name)
 	print_debug(" - Base: ", base)
 	print_debug(" - Added: ", book.get_bv_added())
 	print_debug(" - Subtracted: ", book.get_bv_subtracted())
