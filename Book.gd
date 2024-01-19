@@ -129,7 +129,8 @@ func would_divide_by_zero(category: Book.Category, value) -> bool:
 
 
 func reset() -> void:
-	book.clear()
+	for category in book:
+		book[category].clear()
 	book_vars.set_added(0)
 	book_vars.set_subtracted(0)
 	book_vars.set_multiplied(1)

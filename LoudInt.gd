@@ -93,6 +93,10 @@ func add(amount) -> void:
 	current += amount
 
 
+func add_one() -> void:
+	add(1)
+
+
 func subtract(amount) -> void:
 	current -= amount
 
@@ -115,8 +119,36 @@ func edit_change(category: Book.Category, source, amount: float) -> void:
 	book.edit_change(category, source, amount)
 
 
+func edit_added(source, amount: int) -> void:
+	edit_change(Book.Category.ADDED, source, amount)
+
+
+func edit_subtracted(source, amount: int) -> void:
+	edit_change(Book.Category.SUBTRACTED, source, amount)
+
+
+func edit_multiplied(source, amount: int) -> void:
+	edit_change(Book.Category.MULTIPLIED, source, amount)
+
+
+func edit_divided(source, amount: int) -> void:
+	edit_change(Book.Category.DIVIDED, source, amount)
+
+
 func remove_change(category: Book.Category, source) -> void:
 	book.remove_change(category, source, true)
+
+
+func remove_added(source) -> void:
+	remove_change(Book.Category.ADDED, source)
+
+
+func remove_subtracted(source) -> void:
+	remove_change(Book.Category.SUBTRACTED, source)
+
+
+func remove_multiplied(source) -> void:
+	remove_change(Book.Category.MULTIPLIED, source)
 
 
 func set_default_value(val: int) -> void:
