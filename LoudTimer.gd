@@ -84,10 +84,8 @@ func are_wait_times_equal() -> bool:
 #region Action
 
 
-func start(custom_wait_time := 0.0) -> void:
-	if custom_wait_time > 0.0:
-		wait_time.set_to(custom_wait_time)
-	elif random:
+func start() -> void:
+	if random:
 		wait_time.edit_change(Book.Category.ADDED, wait_time_range, wait_time_range.get_random_point())
 	
 	timer.start()

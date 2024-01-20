@@ -87,6 +87,11 @@ func copycat(_copied_bool: LoudBool) -> void:
 	copycat_changed()
 
 
+func remove_copycat() -> void:
+	copied_bool.changed.disconnect(copycat_changed)
+	copied_bool = null
+
+
 #endregion
 
 
