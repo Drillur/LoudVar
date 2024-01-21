@@ -189,8 +189,8 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 	if not source in book[category].keys():
 		return
 	var amount = book[category][source]
-	# if amount == 0, just stop here and then do a complete re-sync of everything in the book. but erase source first.
 	if would_divide_by_zero(category, amount):
+		# if amount == 0, just stop here and then do a complete re-sync of everything in the book. but erase source first.
 		book[category].erase(source)
 		full_resync()
 		return
@@ -210,6 +210,60 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 		return
 	if sync_afterwards:
 		emit_changed()
+
+
+func add_changer(category: Book.Category, object: Resource) -> void:
+	match category:
+		Book.Category.ADDED:
+			add_adder(object)
+		Book.Category.SUBTRACTED:
+			add_subtracter(object)
+		Book.Category.MULTIPLIED:
+			add_multiplier(object)
+		Book.Category.DIVIDED:
+			add_divider(object)
+
+
+func add_adder(object: Resource) -> void:
+	edit_change(Book.Category.ADDED, object, object.get_value())
+	object.changed.connect(
+		func():
+			edit_change(Book.Category.ADDED, object, object.get_value())
+	)
+
+
+func add_subtracter(object: Resource) -> void:
+	edit_change(Book.Category.SUBTRACTED, object, object.get_value())
+	object.changed.connect(
+		func():
+			edit_change(Book.Category.SUBTRACTED, object, object.get_value())
+	)
+
+
+func add_multiplier(object: Resource) -> void:
+	edit_change(Book.Category.MULTIPLIED, object, object.get_value())
+	object.changed.connect(
+		func():
+			edit_change(Book.Category.MULTIPLIED, object, object.get_value())
+	)
+
+
+func add_divider(object: Resource) -> void:
+	edit_change(Book.Category.DIVIDED, object, object.get_value())
+	object.changed.connect(
+		func():
+			edit_change(Book.Category.DIVIDED, object, object.get_value())
+	)
+
+
+func add_powerer(mantissa: Resource, exponent: Resource, offset := 0) -> void:
+	var power_up = func():
+		#printt("powering up. m: ", mantissa.get_value(), " e: ", exponent.get_value() + offset, " == ", Big.new(mantissa.get_value()).power(exponent.get_value() + offset).text)
+		edit_change(Book.Category.MULTIPLIED, mantissa, Big.new(mantissa.get_value()).power(exponent.get_value() + offset))
+		
+	power_up.call()
+	mantissa.changed.connect(power_up)
+	exponent.changed.connect(power_up)
 
 
 func full_resync() -> void:

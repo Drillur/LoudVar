@@ -223,7 +223,7 @@ func report_on_changed(_variable_name: String):
 
 
 func simple_report() -> void:
-	print(variable_name, " LoudFloat changed to ", get_text())
+	printt(variable_name, " LoudFloat changed to ", get_text())
 
 
 func report() -> void:

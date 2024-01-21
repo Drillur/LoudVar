@@ -46,7 +46,7 @@ func left_or_right_changed() -> void:
 		became_true.emit()
 	elif are_opposite():
 		became_opposite.emit()
-	elif are_either_false():
+	if are_either_false():
 		became_false.emit()
 	emit_changed()
 
