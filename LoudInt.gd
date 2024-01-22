@@ -101,6 +101,10 @@ func subtract(amount) -> void:
 	current -= amount
 
 
+func subtract_one() -> void:
+	subtract(1)
+
+
 func multiply(amount) -> void:
 	current *= amount
 
@@ -153,11 +157,11 @@ func remove_multiplied(source) -> void:
 
 func set_default_value(val: int) -> void:
 	base = val
-	set_to(val)
 
 
 func copycat(loud_int: LoudInt) -> void:
 	set_default_value(0)
+	set_to(0)
 	copycat_var = loud_int
 	copycat_var.changed.connect(copycat_changed)
 	copycat_changed()

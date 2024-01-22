@@ -69,47 +69,48 @@ func get_bv_pending():
 
 
 func change_would_be_redundant(category: Book.Category, amount) -> bool:
-	match category:
-		Book.Category.MULTIPLIED, Book.Category.DIVIDED:
-			if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
-				if is_equal_approx(amount, 1.0):
-					return true
-			else:
-				if amount.equal(1):
-					return true
-		Book.Category.ADDED, Book.Category.SUBTRACTED:
-			if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
-				if is_zero_approx(amount):
-					return true
-			else:
-				if amount.equal(0):
-					return true
+	if Book.is_category_multiplicative(category):
+		if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
+			if is_equal_approx(amount, 1.0):
+				return true
+		else:
+			if amount.equal(1):
+				return true
+	else:
+		if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
+			if is_zero_approx(amount):
+				return true
+		else:
+			if amount.equal(0):
+				return true
 	return false
 
 
 func would_effectively_remove(category: Book.Category, amount) -> bool:
+	if category == Book.Category.PENDING:
+		return false
 	match type:
 		Type.INT, Type.FLOAT:
-			if category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]:
+			if Book.is_category_multiplicative(category):
 				if is_equal_approx(amount, 1.0):
 					return true
-			elif category in [Book.Category.ADDED, Book.Category.SUBTRACTED]:
+			else:
 				if is_zero_approx(amount):
 					return true
 		Type.BIG:
 			if not amount is Big:
 				amount = Big.new(amount)
-			if category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]:
+			if Book.is_category_multiplicative(category):
 				if amount.equal(1):
 					return true
-			elif category in [Book.Category.ADDED, Book.Category.SUBTRACTED]:
+			else:
 				if amount.equal(0):
 					return true
 	return false
 
 
 func would_divide_by_zero(category: Book.Category, value) -> bool:
-	if category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]:
+	if Book.is_category_multiplicative(category):
 		match type:
 			Type.INT, Type.FLOAT:
 				if is_zero_approx(value):
@@ -259,7 +260,13 @@ func add_divider(object: Resource) -> void:
 func add_powerer(mantissa: Resource, exponent: Resource, offset := 0) -> void:
 	var power_up = func():
 		#printt("powering up. m: ", mantissa.get_value(), " e: ", exponent.get_value() + offset, " == ", Big.new(mantissa.get_value()).power(exponent.get_value() + offset).text)
-		edit_change(Book.Category.MULTIPLIED, mantissa, Big.new(mantissa.get_value()).power(exponent.get_value() + offset))
+		edit_change(
+			Book.Category.MULTIPLIED,
+			mantissa,
+			Big.new(mantissa.get_value()).power(
+				max(0, exponent.get_value() + offset)
+			)
+		)
 		
 	power_up.call()
 	mantissa.changed.connect(power_up)
@@ -294,6 +301,14 @@ func get_pending():
 
 func get_changed_value(base):
 	return book_vars.get_changed_value(base)
+
+
+static func is_category_multiplicative(_category: Book.Category) -> bool:
+	return _category in [Book.Category.MULTIPLIED, Book.Category.DIVIDED]
+
+
+static func is_category_additive(_category: Book.Category) -> bool:
+	return _category in [Book.Category.ADDED, Book.Category.SUBTRACTED]
 
 
 #endregion

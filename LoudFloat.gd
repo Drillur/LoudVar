@@ -137,11 +137,11 @@ func remove_multiplied(source) -> void:
 
 func set_default_value(val: float) -> void:
 	base = val
-	set_to(val)
 
 
 func copycat(loud_float: LoudFloat) -> void:
 	set_default_value(0.0)
+	set_to(0.0)
 	copycat_var = loud_float
 	copycat_var.changed.connect(copycat_changed)
 	copycat_changed()

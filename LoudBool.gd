@@ -74,7 +74,6 @@ func set_to(val: bool) -> void:
 
 func set_default_value(val: bool) -> void:
 	base = val
-	set_to(val)
 
 
 func reset() -> void:
@@ -90,6 +89,11 @@ func copycat(_copied_bool: LoudBool) -> void:
 func remove_copycat() -> void:
 	copied_bool.changed.disconnect(copycat_changed)
 	copied_bool = null
+
+
+func contradict(_bool: LoudBool) -> void: # has the opposite effect of copycat
+	set_to(not _bool.get_value())
+	_bool.changed.connect(invert)
 
 
 #endregion
