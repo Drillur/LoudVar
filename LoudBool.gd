@@ -135,3 +135,16 @@ func get_default_value() -> bool:
 
 
 #endregion
+
+
+#region Dev
+
+
+func report_on_change(_variable_name: String) -> void:
+	changed.connect(
+		func():
+			printt(_variable_name, "set " + str(get_value()))
+	)
+
+
+#endregion
