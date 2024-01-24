@@ -65,6 +65,10 @@ func are_all_false() -> bool:
 #region Get
 
 
+func get_value() -> bool:
+	return is_true()
+
+
 func is_true() -> bool:
 	return consensus.is_true()
 
@@ -99,10 +103,6 @@ func are_any_true() -> bool:
 
 func are_any_false() -> bool:
 	return is_somewhat_false()
-
-
-func get_value() -> bool:
-	return is_true()
 
 
 func get_values() -> Array[bool]:

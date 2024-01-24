@@ -24,6 +24,8 @@ signal amount_increased(amount)
 			var prev_cur = current
 			if val < minimum_limit:
 				val = minimum_limit
+			if is_zero_approx(val):
+				val = 0.0
 			current = val
 			text_requires_update = true
 			if prev_cur > val:

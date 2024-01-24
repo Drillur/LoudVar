@@ -39,6 +39,10 @@ func set_to(val: Color) -> void:
 	current = val
 
 
+func set_default_value(val: Color) -> void:
+	base = val
+
+
 func reset() -> void:
 	current = base
 
