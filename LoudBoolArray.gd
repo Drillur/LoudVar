@@ -127,4 +127,17 @@ func report() -> void:
 		i += 1
 
 
+func report_on_changed(var_name: String) -> void:
+	var i := 0
+	for _bool in bool_pool:
+		_bool.changed.connect(
+			func():
+				printt("LoudBoolArray %s bool %s changed to %s." % [
+					var_name,
+					str(i),
+					str(_bool.get_value())
+				])
+		)
+
+
 #endregion

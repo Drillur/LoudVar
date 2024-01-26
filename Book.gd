@@ -89,17 +89,15 @@ func change_would_be_redundant(category: Book.Category, amount) -> bool:
 func would_effectively_remove(category: Book.Category, amount) -> bool:
 	if category == Book.Category.PENDING:
 		return false
-	match type:
-		Type.INT, Type.FLOAT:
+	match typeof(amount):
+		TYPE_INT, TYPE_FLOAT:
 			if Book.is_category_multiplicative(category):
 				if is_equal_approx(amount, 1.0):
 					return true
 			else:
 				if is_zero_approx(amount):
 					return true
-		Type.BIG:
-			if not amount is Big:
-				amount = Big.new(amount)
+		TYPE_OBJECT: # Big number class
 			if Book.is_category_multiplicative(category):
 				if amount.equal(1):
 					return true

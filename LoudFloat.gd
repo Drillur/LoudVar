@@ -20,20 +20,20 @@ signal amount_increased(amount)
 
 @export var current: float:
 	set(val):
+		var previous_value := current
 		if current != val:
-			var prev_cur = current
 			if val < minimum_limit:
 				val = minimum_limit
 			if is_zero_approx(val):
 				val = 0.0
 			current = val
 			text_requires_update = true
-			if prev_cur > val:
-				increased.emit()
-			elif prev_cur < val:
+			if previous_value > val:
 				decreased.emit()
+			elif previous_value < val:
+				increased.emit()
 			emit_changed()
-			changed_with_previous_value.emit(prev_cur)
+			changed_with_previous_value.emit(previous_value)
 @export var book := Book.new(Book.Type.FLOAT)
 
 var base: float
@@ -75,6 +75,10 @@ func add(amount) -> void:
 		return
 	current += amount
 	amount_increased.emit(amount)
+
+
+func add_one() -> void:
+	add(1.0)
 
 
 func subtract(amount) -> void:

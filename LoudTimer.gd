@@ -13,6 +13,7 @@ signal timeout
 signal started
 signal wait_time_changed
 signal stopped
+signal timed_out_or_stopped
 signal duration_elapsed_when_stopped(duration)
 
 var timer: Timer
@@ -50,6 +51,7 @@ func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 
 func timer_timeout() -> void:
 	set_timer_wait_time()
+	timed_out_or_stopped.emit()
 	timeout.emit()
 
 
@@ -96,7 +98,13 @@ func stop() -> void:
 	if is_running():
 		duration_elapsed_when_stopped.emit(timer.wait_time - timer.time_left)
 		timer.stop()
+		timed_out_or_stopped.emit()
 		stopped.emit()
+
+
+func restart() -> void:
+	stop()
+	start()
 
 
 func set_wait_time(value: float) -> void:
@@ -168,6 +176,12 @@ func get_text() -> String:
 		Big.get_float_text(get_wait_time() - get_time_left()),
 		get_wait_time_text()
 	]
+
+
+func get_average_duration() -> float:
+	if random:
+		return wait_time_range.get_midpoint() * wait_time.get_value()
+	return wait_time.get_value()
 
 
 #endregion
