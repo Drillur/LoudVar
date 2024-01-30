@@ -20,6 +20,7 @@ enum Type {
 signal renewed
 
 var type: Type
+var changed_cd := PhysicsCooldown.new(changed)
 
 var book := {
 	Book.Category.ADDED: {},
@@ -136,7 +137,7 @@ func reset() -> void:
 	book_vars.set_divided(1)
 	book_vars.set_pending(0)
 	renewed.emit()
-	#emit_changed()
+	#changed_cd.emit()
 
 
 func add_change(category: Book.Category, source, amount) -> void:
@@ -163,7 +164,7 @@ func add_change(category: Book.Category, source, amount) -> void:
 			book_vars.add_pending(amount)
 	if category == Book.Category.PENDING:
 		return
-	emit_changed()
+	changed_cd.emit()
 
 
 # This has the functionality to be the only method of these 3 you'd need to use!
@@ -208,7 +209,7 @@ func remove_change(category: Book.Category, source, sync_afterwards := true) -> 
 	if category == Book.Category.PENDING:
 		return
 	if sync_afterwards:
-		emit_changed()
+		changed_cd.emit()
 
 
 func add_changer(category: Book.Category, object: Resource) -> void:
@@ -255,19 +256,19 @@ func add_divider(object: Resource) -> void:
 	)
 
 
-func add_powerer(mantissa: Resource, exponent: Resource, offset := 0) -> void:
+func add_powerer(base: Resource, exponent: Resource, offset := 0) -> void:
 	var power_up = func():
-		#printt("powering up. m: ", mantissa.get_value(), " e: ", exponent.get_value() + offset, " == ", Big.new(mantissa.get_value()).power(exponent.get_value() + offset).text)
+		#printt("powering up. m: ", base.get_value(), " e: ", exponent.get_value() + offset, " == ", Big.new(base.get_value()).power(exponent.get_value() + offset).text)
 		edit_change(
 			Book.Category.MULTIPLIED,
-			mantissa,
-			Big.new(mantissa.get_value()).power(
+			base,
+			Big.new(base.get_value()).power(
 				max(0, exponent.get_value() + offset)
 			)
 		)
 		
 	power_up.call()
-	mantissa.changed.connect(power_up)
+	base.changed.connect(power_up)
 	exponent.changed.connect(power_up)
 
 
@@ -284,7 +285,7 @@ func full_resync() -> void:
 		book_vars.add_multiplied(value)
 	for value in book[Category.DIVIDED].values():
 		book_vars.add_divided(value)
-	emit_changed()
+	changed_cd.emit()
 
 
 #endregion

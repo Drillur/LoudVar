@@ -18,6 +18,7 @@ signal duration_elapsed_when_stopped(duration)
 
 var timer: Timer
 var wait_time: LoudFloat # the number matching timer.wait_time
+var running := LoudBool.new(false)
 var wait_time_range: LoudFloatPair # a range in which the timer wait_time will be randomly assigned
 var random: bool
 
@@ -34,6 +35,9 @@ func _init(_wait_time := 0.0, optional_maximum_duration := 0.0) -> void:
 		random = false
 	wait_time.changed.connect(wait_time_changed_receiver)
 	wait_time.minimum_limit = 0.05
+	
+	started.connect(running.set_true)
+	timed_out_or_stopped.connect(running.set_false)
 	
 	timer = Timer.new()
 	gv.add_child(timer) # You will have to replace this line with your own singleton. Mine is gv (GlobalVariables)
@@ -152,7 +156,7 @@ func get_percent() -> float:
 
 
 func is_stopped() -> bool:
-	return timer.is_stopped()
+	return running.is_false()
 
 
 func is_running() -> bool:
@@ -181,6 +185,12 @@ func get_text() -> String:
 func get_average_duration() -> float:
 	if random:
 		return wait_time_range.get_midpoint() * wait_time.get_value()
+	return wait_time.get_value()
+
+
+func get_maximum_duration() -> float:
+	if random:
+		return wait_time_range.get_total() * wait_time.get_value()
 	return wait_time.get_value()
 
 

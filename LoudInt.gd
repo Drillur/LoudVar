@@ -30,7 +30,7 @@ var base: int
 			if val > limit:
 				val = limit
 			if is_zero_approx(val):
-				val = 0.0
+				val = 0
 			current = val
 			text_requires_update = true
 			if is_zero_approx(previous_value):
