@@ -17,20 +17,12 @@ enum Type {
 	BIG,
 }
 
-signal renewed
+signal pending_changed
 
 var type: Type
-var changed_cd := PhysicsCooldown.new(changed)
+var sync: Callable
 
-var book := {
-	Book.Category.ADDED: {},
-	Book.Category.SUBTRACTED: {},
-	Book.Category.MULTIPLIED: {},
-	Book.Category.DIVIDED: {},
-	Book.Category.PENDING: {},
-}
-
-@export var book_vars: Resource
+var book := {}
 
 
 
@@ -38,88 +30,39 @@ func _init(_type: Type):
 	type = _type
 	match type:
 		Type.INT:
-			book_vars = BookVarsInt.new()
+			book = {
+				Book.Category.ADDED: LoudDict.Int.new({"multiplicative": false}),
+				Book.Category.SUBTRACTED: LoudDict.Int.new({"multiplicative": false}),
+				Book.Category.MULTIPLIED: LoudDict.Int.new({"multiplicative": true}),
+				Book.Category.DIVIDED: LoudDict.Int.new({"multiplicative": true}),
+				Book.Category.PENDING: LoudDict.Int.new({"multiplicative": false}),
+			}
+			sync = func(base) -> int:
+				return (base + get_added() - get_subtracted()) * get_multiplied() / get_divided()
 		Type.FLOAT:
-			book_vars = BookVarsFloat.new()
+			book = {
+				Book.Category.ADDED: LoudDict.Float.new({"multiplicative": false}),
+				Book.Category.SUBTRACTED: LoudDict.Float.new({"multiplicative": false}),
+				Book.Category.MULTIPLIED: LoudDict.Float.new({"multiplicative": true}),
+				Book.Category.DIVIDED: LoudDict.Float.new({"multiplicative": true}),
+				Book.Category.PENDING: LoudDict.Float.new({"multiplicative": false}),
+			}
+			sync = func(base) -> float:
+				return (base + get_added() - get_subtracted()) * get_multiplied() / get_divided()
 		Type.BIG:
-			book_vars = BookVarsBig.new()
+			book = {
+				Book.Category.ADDED: LoudDict._Big.new({"multiplicative": false}),
+				Book.Category.SUBTRACTED: LoudDict._Big.new({"multiplicative": false}),
+				Book.Category.MULTIPLIED: LoudDict._Big.new({"multiplicative": true}),
+				Book.Category.DIVIDED: LoudDict._Big.new({"multiplicative": true}),
+				Book.Category.PENDING: LoudDict._Big.new({"multiplicative": false}),
+			}
+			sync = func(base) -> Big:
+				return Big.new(base).add(get_added()).subtract(get_subtracted()).multiply(get_multiplied()).divide(get_divided())
 
 
 
 #region Internal
-
-
-func get_bv_added():
-	return book_vars.added
-
-
-func get_bv_subtracted():
-	return book_vars.subtracted
-
-
-func get_bv_multiplied():
-	return book_vars.multiplied
-
-
-func get_bv_divided():
-	return book_vars.divided
-
-
-func get_bv_pending():
-	return book_vars.pending
-
-
-func change_would_be_redundant(category: Book.Category, amount) -> bool:
-	if Book.is_category_multiplicative(category):
-		if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
-			if is_equal_approx(amount, 1.0):
-				return true
-		else:
-			if amount.equal(1):
-				return true
-	else:
-		if typeof(amount) in [TYPE_FLOAT, TYPE_INT]:
-			if is_zero_approx(amount):
-				return true
-		else:
-			if amount.equal(0):
-				return true
-	return false
-
-
-func would_effectively_remove(category: Book.Category, amount) -> bool:
-	if category == Book.Category.PENDING:
-		return false
-	match typeof(amount):
-		TYPE_INT, TYPE_FLOAT:
-			if Book.is_category_multiplicative(category):
-				if is_equal_approx(amount, 1.0):
-					return true
-			else:
-				if is_zero_approx(amount):
-					return true
-		TYPE_OBJECT: # Big number class
-			if Book.is_category_multiplicative(category):
-				if amount.equal(1):
-					return true
-			else:
-				if amount.equal(0):
-					return true
-	return false
-
-
-func would_divide_by_zero(category: Book.Category, value) -> bool:
-	if Book.is_category_multiplicative(category):
-		match type:
-			Type.INT, Type.FLOAT:
-				if is_zero_approx(value):
-					return true
-			Type.BIG:
-				if not value is Big:
-					value = Big.new(value)
-				if value.equal(0):
-					return true
-	return false
 
 
 #endregion
@@ -130,86 +73,24 @@ func would_divide_by_zero(category: Book.Category, value) -> bool:
 
 func reset() -> void:
 	for category in book:
-		book[category].clear()
-	book_vars.set_added(0)
-	book_vars.set_subtracted(0)
-	book_vars.set_multiplied(1)
-	book_vars.set_divided(1)
-	book_vars.set_pending(0)
-	renewed.emit()
+		book[category].reset()
 	#changed_cd.emit()
 
 
-func add_change(category: Book.Category, source, amount) -> void:
-	if book[category].has(source):
-		if gv.dev_mode:
-			print_debug("This source already logged a change for this LoudInt (", self, ")! Fix your code you hack fraud.")
-		return
-	if change_would_be_redundant(category, amount):
-		return
-	
-	if amount is Big:
-		amount = Big.new(amount)
-	book[category][source] = amount
-	match category:
-		Book.Category.ADDED:
-			book_vars.add_added(amount)
-		Book.Category.SUBTRACTED:
-			book_vars.add_subtracted(amount)
-		Book.Category.MULTIPLIED:
-			book_vars.add_multiplied(amount)
-		Book.Category.DIVIDED:
-			book_vars.add_divided(amount)
-		Book.Category.PENDING:
-			book_vars.add_pending(amount)
-	if category == Book.Category.PENDING:
-		return
-	changed_cd.emit()
-
-
-# This has the functionality to be the only method of these 3 you'd need to use!
-# If you want to temporarily add 3 to this int,
-# call edit_change(Book.Category.ADDED, self, 3) -- simple as that!
-
-# Note that specifically for this class, multiplying by a float could be pretty weird!
-# But because the book tracks the logs, it will be fine once you remove_change().
-# Also beware this int's limit!
-
-
 func edit_change(category: Book.Category, source, amount) -> void:
-	var effectively_removing := false
-	if book[category].has(source):
-		effectively_removing = would_effectively_remove(category, amount)
-		remove_change(category, source, effectively_removing)
-	if not effectively_removing:
-		add_change(category, source, amount)
+	book[category].edit(source, amount)
+	if category != Book.Category.PENDING:
+		emit_changed()
+	else:
+		pending_changed.emit()
 
 
-func remove_change(category: Book.Category, source, sync_afterwards := true) -> void:
-	if not source in book[category].keys():
-		return
-	var amount = book[category][source]
-	if would_divide_by_zero(category, amount):
-		# if amount == 0, just stop here and then do a complete re-sync of everything in the book. but erase source first.
-		book[category].erase(source)
-		full_resync()
-		return
-	match category:
-		Book.Category.ADDED:
-			book_vars.subtract_added(amount)
-		Book.Category.SUBTRACTED:
-			book_vars.subtract_subtracted(amount)
-		Book.Category.MULTIPLIED:
-			book_vars.subtract_multiplied(amount)
-		Book.Category.DIVIDED:
-			book_vars.subtract_divided(amount)
-		Book.Category.PENDING:
-			book_vars.subtract_pending(amount)
+func remove_change(category: Book.Category, source) -> void:
 	book[category].erase(source)
-	if category == Book.Category.PENDING:
-		return
-	if sync_afterwards:
-		changed_cd.emit()
+	if category != Book.Category.PENDING:
+		emit_changed()
+	else:
+		pending_changed.emit()
 
 
 func add_changer(category: Book.Category, object: Resource) -> void:
@@ -266,26 +147,9 @@ func add_powerer(base: Resource, exponent: Resource, offset := 0) -> void:
 				max(0, exponent.get_value() + offset)
 			)
 		)
-		
 	power_up.call()
 	base.changed.connect(power_up)
 	exponent.changed.connect(power_up)
-
-
-func full_resync() -> void:
-	book_vars.set_added(0)
-	book_vars.set_subtracted(0)
-	book_vars.set_multiplied(1)
-	book_vars.set_divided(1)
-	for value in book[Category.ADDED].values():
-		book_vars.add_added(value)
-	for value in book[Category.SUBTRACTED].values():
-		book_vars.add_subtracted(value)
-	for value in book[Category.MULTIPLIED].values():
-		book_vars.add_multiplied(value)
-	for value in book[Category.DIVIDED].values():
-		book_vars.add_divided(value)
-	changed_cd.emit()
 
 
 #endregion
@@ -294,12 +158,24 @@ func full_resync() -> void:
 #region Get
 
 
+func get_added():
+	return book[Book.Category.ADDED].sum
+
+
+func get_subtracted():
+	return book[Book.Category.SUBTRACTED].sum
+
+
+func get_multiplied():
+	return book[Book.Category.MULTIPLIED].sum
+
+
+func get_divided():
+	return book[Book.Category.DIVIDED].sum
+
+
 func get_pending():
-	return get_bv_pending()
-
-
-func get_changed_value(base):
-	return book_vars.get_changed_value(base)
+	return book[Book.Category.PENDING].sum
 
 
 static func is_category_multiplicative(_category: Book.Category) -> bool:
@@ -319,12 +195,12 @@ static func is_category_additive(_category: Book.Category) -> bool:
 func report() -> void:
 	printt("Book Report (", self, ")")
 	for category in book:
-		var bv = call("get_bv_" + Category.keys()[category].to_lower())
+		var bv = call("get_" + Category.keys()[category].to_lower())
 		if bv is Big:
 			bv = bv.get_text()
-		printt(" - ", Category.keys()[category], "(" + bv + ")")
-		for source in book[category]:
+		printt(" - ", Category.keys()[category], "(" + str(bv) + ")")
+		for source in book[category].data.keys():
 			if type == Type.BIG:
-				printt("    - ", source, ": ", book[category][source].get_text())
+				printt("    - ", book[category].get_value(source).text, "(" + str(source) + ")")
 			else:
-				printt("    - ", source, ": ", book[category][source])
+				printt("    - ", book[category].get_value(source), "(" + str(source) + ")")

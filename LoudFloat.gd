@@ -11,12 +11,18 @@ extends Resource
 
 
 
-signal changed_with_previous_value(previous_value)
 signal increased
 signal decreased
 signal text_changed
 signal renewed
 signal amount_increased(amount)
+
+var changed_cd := PhysicsCooldown.new(changed)
+var increased_cd := PhysicsCooldown.new(increased)
+var decreased_cd := PhysicsCooldown.new(decreased)
+var text_changed_cd := PhysicsCooldown.new(text_changed)
+var renewed_cd := PhysicsCooldown.new(renewed)
+
 
 @export var current: float:
 	set(val):
@@ -29,12 +35,11 @@ signal amount_increased(amount)
 			current = val
 			text_requires_update = true
 			if previous_value > val:
-				decreased.emit()
+				decreased_cd.emit()
 			elif previous_value < val:
-				increased.emit()
-			emit_changed()
-			changed_with_previous_value.emit(previous_value)
-@export var book := Book.new(Book.Type.FLOAT)
+				increased_cd.emit()
+			changed_cd.emit()
+var book := Book.new(Book.Type.FLOAT)
 
 var base: float
 var text_requires_update := true
@@ -43,17 +48,16 @@ var text: String:
 		if text_requires_update:
 			text_requires_update = false
 			text = Big.get_float_text(current)
-			text_changed.emit()
+			text_changed_cd.emit()
 		return text
 var minimum_limit := -1.79769e308
-var copycat_var: LoudFloat
 
 
 
 func _init(_base: float) -> void:
-	book.changed.connect(sync)
 	base = _base
 	current = base
+	book.changed.connect(sync)
 
 
 
@@ -62,8 +66,10 @@ func _init(_base: float) -> void:
 
 func reset() -> void:
 	book.reset()
+	if current == base:
+		return
 	current = base
-	renewed.emit()
+	renewed_cd.emit()
 
 
 func set_to(amount) -> void:
@@ -100,9 +106,7 @@ func divide(amount) -> void:
 
 
 func sync() -> void:
-	set_to(
-		book.get_changed_value(base)
-	)
+	set_to(book.sync.call(base))
 
 
 func edit_change(category: Book.Category, source, amount: float) -> void:
@@ -126,7 +130,7 @@ func edit_divided(source, amount: float) -> void:
 
 
 func remove_change(category: Book.Category, source) -> void:
-	book.remove_change(category, source, true)
+	book.remove_change(category, source)
 
 
 func remove_added(source) -> void:
@@ -145,16 +149,13 @@ func set_default_value(val: float) -> void:
 	base = val
 
 
-func copycat(loud_float: LoudFloat) -> void:
+func copycat(cat: Resource) -> void:
 	set_default_value(0.0)
 	set_to(0.0)
-	copycat_var = loud_float
-	copycat_var.changed.connect(copycat_changed)
-	copycat_changed()
-
-
-func copycat_changed() -> void:
-	book.edit_change(Book.Category.ADDED, copycat_var, copycat_var.get_value())
+	var copy = func():
+		book.edit_change(Book.Category.ADDED, cat, cat.get_value())
+	copy.call()
+	cat.changed.connect(copy)
 
 
 #endregion
@@ -233,13 +234,9 @@ func simple_report() -> void:
 
 
 func report() -> void:
-	print_debug("Report for ", str(self) if variable_name == "" else variable_name)
-	print_debug(" - Base: ", base)
-	print_debug(" - Added: ", book.get_bv_added())
-	print_debug(" - Subtracted: ", book.get_bv_subtracted())
-	print_debug(" - Multiplied: ", book.get_bv_multiplied())
-	print_debug(" - Divided: ", book.get_bv_divided())
-	print_debug(" - == Result: ", get_text())
+	printt("Report for ", str(self) if variable_name == "" else variable_name)
+	printt(" - Base: ", base)
+	book.report()
 
 
 #endregion

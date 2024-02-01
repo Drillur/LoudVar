@@ -22,6 +22,17 @@ signal value_set_greater_zero
 signal value_set_to_zero
 signal set_to_same_value
 
+var changed_cd := PhysicsCooldown.new(changed)
+var increased_cd := PhysicsCooldown.new(increased)
+var decreased_cd := PhysicsCooldown.new(decreased)
+var renewed_cd := PhysicsCooldown.new(renewed)
+var became_non_zero_cd := PhysicsCooldown.new(became_non_zero)
+var became_zero_cd := PhysicsCooldown.new(became_zero)
+var value_set_cd := PhysicsCooldown.new(value_set)
+var value_set_greater_zero_cd := PhysicsCooldown.new(value_set_greater_zero)
+var value_set_to_zero_cd := PhysicsCooldown.new(value_set_to_zero)
+var set_to_same_value_cd := PhysicsCooldown.new(set_to_same_value)
+
 var base: int
 @export var current: int:
 	set(val):
@@ -34,16 +45,16 @@ var base: int
 			current = val
 			text_requires_update = true
 			if is_zero_approx(previous_value):
-				became_non_zero.emit()
+				became_non_zero_cd.emit()
 			elif is_zero_approx(current):
-				became_zero.emit()
+				became_zero_cd.emit()
 			if previous_value > val:
 				decreased.emit()
 			elif previous_value < val:
 				increased.emit()
 			emit_changed()
 		else:
-			set_to_same_value.emit()
+			set_to_same_value_cd.emit()
 
 var copycat_var: LoudInt
 var limit: int = 9223372036854775807
@@ -73,18 +84,19 @@ func _init(_base: int) -> void:
 
 func reset() -> void:
 	book.reset()
+	if current == base:
+		return
 	current = base
-	renewed.emit()
 
 
 
 func set_to(amount) -> void:
 	current = amount
-	value_set.emit()
+	value_set_cd.emit()
 	if amount > 0:
-		value_set_greater_zero.emit()
+		value_set_greater_zero_cd.emit()
 	elif is_zero_approx(amount):
-		value_set_to_zero.emit()
+		value_set_to_zero_cd.emit()
 
 
 func set_limit(val: int) -> void:
@@ -116,9 +128,7 @@ func divide(amount) -> void:
 
 
 func sync() -> void:
-	set_to(
-		book.get_changed_value(base)
-	)
+	set_to(book.sync.call(base))
 
 
 func edit_change(category: Book.Category, source, amount: float) -> void:
@@ -142,7 +152,7 @@ func edit_divided(source, amount: int) -> void:
 
 
 func remove_change(category: Book.Category, source) -> void:
-	book.remove_change(category, source, true)
+	book.remove_change(category, source)
 
 
 func remove_added(source) -> void:
@@ -255,12 +265,7 @@ func simple_report() -> void:
 
 func report() -> void:
 	print_debug("Report for ", str(self) if variable_name == "" else variable_name)
-	print_debug(" - Base: ", base)
-	print_debug(" - Added: ", book.get_bv_added())
-	print_debug(" - Subtracted: ", book.get_bv_subtracted())
-	print_debug(" - Multiplied: ", book.get_bv_multiplied())
-	print_debug(" - Divided: ", book.get_bv_divided())
-	print_debug(" - == Result: ", get_text())
+	book.report()
 
 
 #endregion
