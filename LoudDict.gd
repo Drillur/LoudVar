@@ -137,6 +137,18 @@ func recalculate_sum() -> void:
 		add_to_sum.call(get_value(x))
 
 
+func are_values_equal(value1, value2) -> bool:
+	match typeof(value1):
+		TYPE_INT, TYPE_FLOAT:
+			match typeof(value2):
+				TYPE_INT, TYPE_FLOAT:
+					return is_equal_approx(value1, value2)
+				_:
+					return value2.equal(value1)
+		_:
+			return value1.equal(value2)
+
+
 #endregion
 
 
@@ -162,6 +174,8 @@ func add(key, value) -> void:
 
 func edit(key, value) -> void:
 	if key in data.keys():
+		if are_values_equal(get_value(key), value):
+			return
 		erase(key)
 	add(key, value)
 
