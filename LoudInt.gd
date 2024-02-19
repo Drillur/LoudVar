@@ -101,6 +101,8 @@ func set_to(amount) -> void:
 
 func set_limit(val: int) -> void:
 	limit = val
+	if current > limit:
+		current = limit
 
 
 func add(amount) -> void:

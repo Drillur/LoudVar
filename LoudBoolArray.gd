@@ -15,13 +15,10 @@ var bool_pool: Array[LoudBool]
 
 
 func _init(bools: Array[LoudBool]) -> void:
-	bool_pool = bools
-	for _bool in bool_pool:
-		_bool.changed.connect(update_consensus)
+	set_bools(bools)
 	consensus.became_true.connect(func(): became_true.emit())
 	consensus.became_false.connect(func(): became_false.emit())
 	consensus.changed.connect(emit_changed)
-	update_consensus()
 
 
 
@@ -57,6 +54,19 @@ func are_all_false() -> bool:
 		if _bool.is_true():
 			return false
 	return true
+
+
+#endregion
+
+
+#region Action
+
+
+func set_bools(bools: Array[LoudBool]) -> void:
+	bool_pool = bools
+	for _bool in bool_pool:
+		_bool.changed.connect(update_consensus)
+	update_consensus()
 
 
 #endregion

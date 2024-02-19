@@ -127,14 +127,13 @@ func _init(_data := {}) -> void:
 			return false
 
 
-
 #region Internal
 
 
 func recalculate_sum() -> void:
 	reset_sum.call()
-	for x in data.values():
-		add_to_sum.call(get_value(x))
+	for value in data.values():
+		add_to_sum.call(value)
 
 
 func are_values_equal(value1, value2) -> bool:
