@@ -1,18 +1,10 @@
-class_name LoudFloatPair
+class_name LoudIntPair
 extends Resource
 
 
 
-# Use example: Current and Total Experience!
-# I use the 'filled' signal below to know when a unit has gained enough xp to level up!
-# I would also ensure that limit_to_total is false, or your unit might waste xp.
-# Methods like 'get_current_percent()' and 'get_midpoint()' make this class invaluable.
-# You're currently wishing you had thought of this like I was when I was thinking of it!
-
-
-
-@export var current: LoudFloat
-var total: LoudFloat
+@export var current: LoudInt
+var total: LoudInt
 
 var full := LoudBool.new(false)
 var empty := LoudBool.new(false)
@@ -24,9 +16,9 @@ var limit_to_total := true
 
 
 
-func _init(base_value: float, base_total: float, _limit_to_total = true):
-	current = LoudFloat.new(base_value)
-	total = LoudFloat.new(base_total)
+func _init(base_value: int, base_total: int, _limit_to_total = true):
+	current = LoudInt.new(base_value)
+	total = LoudInt.new(base_total)
 	limit_to_total = _limit_to_total
 	if current.equal(total.get_value()):
 		full.set_default_value(true)
@@ -40,7 +32,6 @@ func _init(base_value: float, base_total: float, _limit_to_total = true):
 	total.changed.connect(check_if_full)
 	current.changed.connect(emit_changed)
 	total.changed.connect(emit_changed)
-
 
 
 #region Internal
@@ -63,17 +54,17 @@ func check_if_full() -> void:
 #region Action
 
 
-func do_not_limit_to_total() -> LoudFloatPair:
+func do_not_limit_to_total() -> LoudIntPair:
 	limit_to_total = false
 	return self
 
 
-func do_not_limit_to_zero() -> LoudFloatPair:
+func do_not_limit_to_zero() -> LoudIntPair:
 	limit_to_zero = false
 	return self
 
 
-func add(amount: float) -> void:
+func add(amount: int) -> void:
 	if limit_to_total and full.is_true():
 		return
 	current.add(amount)
@@ -84,7 +75,7 @@ func add(amount: float) -> void:
 		full.set_to(true)
 
 
-func subtract(amount: float) -> void:
+func subtract(amount: int) -> void:
 	if limit_to_zero and empty.is_true():
 		return
 	current.subtract(amount)
@@ -93,6 +84,14 @@ func subtract(amount: float) -> void:
 		full.set_to(false)
 	if current.equal(0):
 		empty.set_to(true)
+
+
+func add_one() -> void:
+	add(1)
+
+
+func subtract_one() -> void:
+	subtract(1)
 
 
 func clamp_current() -> void:
@@ -122,15 +121,15 @@ func dump() -> void:
 #region Get
 
 
-func get_value() -> float:
+func get_value() -> int:
 	return current.get_value()
 
 
-func get_current() -> float:
+func get_current() -> int:
 	return get_value()
 
 
-func get_total() -> float:
+func get_total() -> int:
 	return total.get_value()
 
 
@@ -190,18 +189,28 @@ func is_empty() -> bool:
 func is_not_empty() -> bool:
 	return empty.is_false()
 
+
 #endregion
 
 
 #region Dev
 
 
+var variable_name: String
+
+
+func report_on_changed(_variable_name: String):
+	variable_name = _variable_name
+	changed.connect(simple_report)
+
+
+func simple_report() -> void:
+	printt(variable_name, " LoudInt changed to ", get_text())
+
+
 func report() -> void:
-	print_debug("Report for ", self)
-	print_debug(" - Current:")
-	current.report()
-	print_debug(" - Total:")
-	total.report()
+	print_debug("Report for ", str(self) if variable_name == "" else variable_name)
+	#book.report()
 
 
 #endregion

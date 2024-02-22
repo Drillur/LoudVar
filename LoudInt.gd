@@ -12,6 +12,8 @@ extends Resource
 
 
 
+const LIMIT: int = 9223372036854775807
+
 signal increased
 signal decreased
 signal renewed
@@ -21,7 +23,9 @@ signal value_set
 signal value_set_greater_zero
 signal value_set_to_zero
 signal set_to_same_value
+signal text_changed
 
+var text_changed_cd := PhysicsCooldown.new(text_changed)
 var changed_cd := PhysicsCooldown.new(changed)
 var increased_cd := PhysicsCooldown.new(increased)
 var decreased_cd := PhysicsCooldown.new(decreased)
@@ -38,8 +42,8 @@ var base: int
 	set(val):
 		var previous_value := current
 		if current != val:
-			if val > limit:
-				val = limit
+			if val > LIMIT:
+				val = LIMIT
 			if is_zero_approx(val):
 				val = 0
 			current = val
@@ -57,7 +61,6 @@ var base: int
 			set_to_same_value_cd.emit()
 
 var copycat_var: LoudInt
-var limit: int = 9223372036854775807
 @export var book := Book.new(Book.Type.INT)
 
 # Book tracks every source of edits to the above values.
@@ -68,6 +71,7 @@ var text: String:
 		if text_requires_update:
 			text_requires_update = false
 			text = Big.get_float_text(current)
+			text_changed_cd.emit()
 		return text
 
 
@@ -97,12 +101,6 @@ func set_to(amount) -> void:
 		value_set_greater_zero_cd.emit()
 	elif is_zero_approx(amount):
 		value_set_to_zero_cd.emit()
-
-
-func set_limit(val: int) -> void:
-	limit = val
-	if current > limit:
-		current = limit
 
 
 func add(amount) -> void:
@@ -213,14 +211,6 @@ func is_negative() -> bool:
 
 func is_not_positive() -> bool:
 	return is_negative()
-
-
-func at_limit() -> bool:
-	return equal(limit)
-
-
-func less_than_limit() -> bool:
-	return less(limit)
 
 
 func greater(val) -> bool:
