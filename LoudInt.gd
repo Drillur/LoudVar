@@ -23,9 +23,7 @@ signal value_set
 signal value_set_greater_zero
 signal value_set_to_zero
 signal set_to_same_value
-signal text_changed
 
-var text_changed_cd := PhysicsCooldown.new(text_changed)
 var changed_cd := PhysicsCooldown.new(changed)
 var increased_cd := PhysicsCooldown.new(increased)
 var decreased_cd := PhysicsCooldown.new(decreased)
@@ -71,7 +69,6 @@ var text: String:
 		if text_requires_update:
 			text_requires_update = false
 			text = Big.get_float_text(current)
-			text_changed_cd.emit()
 		return text
 
 

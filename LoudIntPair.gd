@@ -26,8 +26,8 @@ func _init(base_value: int, base_total: int, _limit_to_total = true):
 	elif current.equal(0):
 		empty.set_default_value(true)
 		empty.reset()
-	current.text_changed.connect(text_changed)
-	total.text_changed.connect(text_changed)
+	current.changed.connect(text_changed)
+	total.changed.connect(text_changed)
 	current.changed.connect(check_if_full)
 	total.changed.connect(check_if_full)
 	current.changed.connect(emit_changed)
@@ -134,29 +134,29 @@ func get_total() -> int:
 
 
 func get_current_percent() -> float:
-	return get_value() / get_total()
+	return float(get_value()) / get_total()
 
 
-func get_deficit() -> float:
+func get_deficit() -> int:
 	return abs(get_total() - get_current())
 
 
-func get_surplus(amount: float) -> float:
+func get_surplus(amount: int) -> int:
 	if full.is_true() or get_value() + amount > get_total():
 		return (get_current() + amount) - get_total()
 	return 0.0
 
 
-func get_midpoint() -> float:
+func get_midpoint() -> int:
 	if is_full():
 		return get_total()
 	return (get_current() + get_total()) / 2
 
 
-func get_random_point() -> float:
+func get_random_point() -> int:
 	if is_full():
 		return get_total()
-	return randf_range(get_current(), get_total())
+	return randi_range(get_current(), get_total())
 
 
 func get_text() -> String:

@@ -13,14 +13,12 @@ extends Resource
 
 signal increased
 signal decreased
-signal text_changed
 signal renewed
 signal amount_increased(amount)
 
 var changed_cd := PhysicsCooldown.new(changed)
 var increased_cd := PhysicsCooldown.new(increased)
 var decreased_cd := PhysicsCooldown.new(decreased)
-var text_changed_cd := PhysicsCooldown.new(text_changed)
 var renewed_cd := PhysicsCooldown.new(renewed)
 
 
@@ -48,7 +46,6 @@ var text: String:
 		if text_requires_update:
 			text_requires_update = false
 			text = Big.get_float_text(current)
-			text_changed_cd.emit()
 		return text
 var minimum_limit := -1.79769e308
 

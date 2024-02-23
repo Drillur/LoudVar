@@ -34,8 +34,8 @@ func _init(base_value: float, base_total: float, _limit_to_total = true):
 	elif current.equal(0):
 		empty.set_default_value(true)
 		empty.reset()
-	current.text_changed.connect(text_changed)
-	total.text_changed.connect(text_changed)
+	current.changed.connect(text_changed)
+	total.changed.connect(text_changed)
 	current.changed.connect(check_if_full)
 	total.changed.connect(check_if_full)
 	current.changed.connect(emit_changed)
