@@ -89,7 +89,7 @@ class _Big:
 var data := {}
 var base := {}
 var multiplicative: bool
-var used_for_numbers: bool
+#var used_for_numbers: bool
 var add_to_sum: Callable
 var subtract_from_sum: Callable
 var reset_sum: Callable
@@ -100,7 +100,7 @@ var would_divide_by_zero: Callable
 
 func _init(_data := {}) -> void:
 	multiplicative = _data.get("multiplicative")
-	used_for_numbers = _data.erase("multiplicative")
+	#used_for_numbers = _data.erase("multiplicative")
 	base = _data
 	data = base
 	if multiplicative:

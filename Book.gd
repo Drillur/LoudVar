@@ -77,6 +77,10 @@ func reset() -> void:
 	#changed_cd.emit()
 
 
+func reset_pending() -> void:
+	book[Book.Category.PENDING].reset()
+
+
 func edit_change(category: Book.Category, source, amount) -> void:
 	book[category].edit(source, amount)
 	if category != Book.Category.PENDING:
