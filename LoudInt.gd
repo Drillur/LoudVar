@@ -59,7 +59,7 @@ var base: int
 			set_to_same_value_cd.emit()
 
 var copycat_var: LoudInt
-@export var book := Book.new(Book.Type.INT)
+var book := Book.new(Book.Type.INT)
 
 # Book tracks every source of edits to the above values.
 

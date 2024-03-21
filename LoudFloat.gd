@@ -15,6 +15,7 @@ signal increased
 signal decreased
 signal renewed
 signal amount_increased(amount)
+signal became_not_1
 
 var changed_cd := PhysicsCooldown.new(changed)
 var increased_cd := PhysicsCooldown.new(increased)
@@ -32,6 +33,8 @@ var renewed_cd := PhysicsCooldown.new(renewed)
 				val = 0.0
 			current = val
 			text_requires_update = true
+			if previous_value == 1.0:
+				became_not_1.emit()
 			if previous_value > val:
 				decreased_cd.emit()
 			elif previous_value < val:

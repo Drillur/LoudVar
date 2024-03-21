@@ -69,6 +69,11 @@ func set_bools(bools: Array[LoudBool]) -> void:
 	update_consensus()
 
 
+func set_to(value: bool) -> void:
+	for x in bool_pool:
+		x.set_to(value)
+
+
 #endregion
 
 

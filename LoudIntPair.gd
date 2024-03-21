@@ -97,12 +97,12 @@ func subtract_one() -> void:
 func clamp_current() -> void:
 	if limit_to_total:
 		if limit_to_zero:
-			current.current = clampf(get_current(), 0.0, get_total())
+			current.current = clampi(get_current(), 0, get_total())
 		else:
-			current.current = minf(get_current(), get_total())
+			current.current = mini(get_current(), get_total())
 	else:
 		if limit_to_zero:
-			current.current = maxf(get_current(), 0.0)
+			current.current = maxi(get_current(), 0)
 
 
 func fill() -> void:
@@ -144,7 +144,7 @@ func get_deficit() -> int:
 func get_surplus(amount: int) -> int:
 	if full.is_true() or get_value() + amount > get_total():
 		return (get_current() + amount) - get_total()
-	return 0.0
+	return 0
 
 
 func get_midpoint() -> int:
